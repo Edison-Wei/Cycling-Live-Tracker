@@ -7,15 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BEDA83C22D65B90C001C159A /* urunApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEDA83C12D65B90C001C159A /* urunApp.swift */; };
+		BE390FF22D66DCC400F310EE /* DeviceLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE390FF12D66DCC400F310EE /* DeviceLocationService.swift */; };
+		BE58BA732D82118900521B04 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA722D82118800521B04 /* NetworkMonitor.swift */; };
+		BE58BA752D82605C00521B04 /* MapOfRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA742D82605B00521B04 /* MapOfRoute.swift */; };
+		BE58BA772D8CE67400521B04 /* LiveTrackerLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA762D8CE67300521B04 /* LiveTrackerLocation.swift */; };
+		BE887F232D8E8C780098F6BA /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE887F222D8E8C780098F6BA /* Models.swift */; };
+		BECCC4F62D7E46BA0031FA81 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = BECCC4F52D7E46BA0031FA81 /* Route.swift */; };
+		BEDA83C22D65B90C001C159A /* CyclingLiveTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEDA83C12D65B90C001C159A /* CyclingLiveTrackerApp.swift */; };
 		BEDA83C42D65B90C001C159A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEDA83C32D65B90C001C159A /* ContentView.swift */; };
 		BEDA83C62D65B90F001C159A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEDA83C52D65B90F001C159A /* Assets.xcassets */; };
 		BEDA83C92D65B90F001C159A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEDA83C82D65B90F001C159A /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BEDA83BE2D65B90C001C159A /* urun.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = urun.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		BEDA83C12D65B90C001C159A /* urunApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = urunApp.swift; sourceTree = "<group>"; };
+		BE390FF12D66DCC400F310EE /* DeviceLocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLocationService.swift; sourceTree = "<group>"; };
+		BE58BA722D82118800521B04 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		BE58BA742D82605B00521B04 /* MapOfRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapOfRoute.swift; sourceTree = "<group>"; };
+		BE58BA762D8CE67300521B04 /* LiveTrackerLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTrackerLocation.swift; sourceTree = "<group>"; };
+		BE887F222D8E8C780098F6BA /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		BECCC4F52D7E46BA0031FA81 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
+		BEDA83BE2D65B90C001C159A /* CyclingLiveTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CyclingLiveTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEDA83C12D65B90C001C159A /* CyclingLiveTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclingLiveTrackerApp.swift; sourceTree = "<group>"; };
 		BEDA83C32D65B90C001C159A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BEDA83C52D65B90F001C159A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BEDA83C82D65B90F001C159A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -43,7 +55,7 @@
 		BEDA83BF2D65B90C001C159A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BEDA83BE2D65B90C001C159A /* urun.app */,
+				BEDA83BE2D65B90C001C159A /* CyclingLiveTracker.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -51,10 +63,16 @@
 		BEDA83C02D65B90C001C159A /* urun */ = {
 			isa = PBXGroup;
 			children = (
-				BEDA83C12D65B90C001C159A /* urunApp.swift */,
+				BE887F222D8E8C780098F6BA /* Models.swift */,
+				BE58BA742D82605B00521B04 /* MapOfRoute.swift */,
+				BE58BA722D82118800521B04 /* NetworkMonitor.swift */,
+				BECCC4F52D7E46BA0031FA81 /* Route.swift */,
+				BEDA83C12D65B90C001C159A /* CyclingLiveTrackerApp.swift */,
 				BEDA83C32D65B90C001C159A /* ContentView.swift */,
 				BEDA83C52D65B90F001C159A /* Assets.xcassets */,
 				BEDA83C72D65B90F001C159A /* Preview Content */,
+				BE390FF12D66DCC400F310EE /* DeviceLocationService.swift */,
+				BE58BA762D8CE67300521B04 /* LiveTrackerLocation.swift */,
 			);
 			path = urun;
 			sourceTree = "<group>";
@@ -70,9 +88,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BEDA83BD2D65B90C001C159A /* urun */ = {
+		BEDA83BD2D65B90C001C159A /* CyclingLiveTracker */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BEDA83CC2D65B90F001C159A /* Build configuration list for PBXNativeTarget "urun" */;
+			buildConfigurationList = BEDA83CC2D65B90F001C159A /* Build configuration list for PBXNativeTarget "CyclingLiveTracker" */;
 			buildPhases = (
 				BEDA83BA2D65B90C001C159A /* Sources */,
 				BEDA83BB2D65B90C001C159A /* Frameworks */,
@@ -82,9 +100,9 @@
 			);
 			dependencies = (
 			);
-			name = urun;
+			name = CyclingLiveTracker;
 			productName = urun;
-			productReference = BEDA83BE2D65B90C001C159A /* urun.app */;
+			productReference = BEDA83BE2D65B90C001C159A /* CyclingLiveTracker.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -102,7 +120,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BEDA83B92D65B90C001C159A /* Build configuration list for PBXProject "urun" */;
+			buildConfigurationList = BEDA83B92D65B90C001C159A /* Build configuration list for PBXProject "CyclingLiveTracker" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -115,7 +133,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BEDA83BD2D65B90C001C159A /* urun */,
+				BEDA83BD2D65B90C001C159A /* CyclingLiveTracker */,
 			);
 		};
 /* End PBXProject section */
@@ -138,7 +156,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				BEDA83C42D65B90C001C159A /* ContentView.swift in Sources */,
-				BEDA83C22D65B90C001C159A /* urunApp.swift in Sources */,
+				BE58BA752D82605C00521B04 /* MapOfRoute.swift in Sources */,
+				BECCC4F62D7E46BA0031FA81 /* Route.swift in Sources */,
+				BE887F232D8E8C780098F6BA /* Models.swift in Sources */,
+				BE58BA732D82118900521B04 /* NetworkMonitor.swift in Sources */,
+				BEDA83C22D65B90C001C159A /* CyclingLiveTrackerApp.swift in Sources */,
+				BE58BA772D8CE67400521B04 /* LiveTrackerLocation.swift in Sources */,
+				BE390FF22D66DCC400F310EE /* DeviceLocationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,6 +298,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"urun/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location required to accurately track";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -302,6 +327,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"urun/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location required to accurately track";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -323,7 +349,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BEDA83B92D65B90C001C159A /* Build configuration list for PBXProject "urun" */ = {
+		BEDA83B92D65B90C001C159A /* Build configuration list for PBXProject "CyclingLiveTracker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BEDA83CA2D65B90F001C159A /* Debug */,
@@ -332,7 +358,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BEDA83CC2D65B90F001C159A /* Build configuration list for PBXNativeTarget "urun" */ = {
+		BEDA83CC2D65B90F001C159A /* Build configuration list for PBXNativeTarget "CyclingLiveTracker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BEDA83CD2D65B90F001C159A /* Debug */,
