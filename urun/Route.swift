@@ -8,18 +8,14 @@
 import MapKit
 
 class Route {
-    private var routeInfo: RouteInfo = RouteInfo()
+    private var routeInfo: NetworkRouteInfo = NetworkRouteInfo()
     private var routeDetail: RouteDetail = RouteDetail()
     
     init() {
-        // Do something or handle or nothing
     }
     
-    init(routeInfo: RouteInfo) {
+    init(routeInfo: NetworkRouteInfo) {
         self.routeInfo = routeInfo
-        // Check routeInfo if:
-        //      1. URL Connection failed
-        //      2. Data request failed
         if routeInfo.isEmpty() {
             return
         }
@@ -27,15 +23,8 @@ class Route {
     }
     
     func getCLLocationCoordinates2D() -> [CLLocationCoordinate2D] {
-//        let newCoord2D = routeInfo.gpx.map{ (point: Coordinates) -> CLLocationCoordinate2D in
-//            return CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
-//        }
-//        return newCoord2D
-//        return routeInfo.gpx.map{ point in
-//            return CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
-//        }
         return routeInfo.gpx?.map { point in
-            return CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon) } ?? []
+            return CLLocationCoordinate2D(latitude: point.latitude, longitude: point.longitude) } ?? []
     }
  
     /**
@@ -46,12 +35,12 @@ class Route {
      * @returns an object containing { "totalDistance": distance, "latitude": lat1, "longitude": lng1, "zoom": zoom }
      * @returns null for all errors
      */
-    func calculateGeojson(GeoJSON: [Coordinates]) -> RouteDetail {
+    func calculateGeojson(GeoJSON: [NetworkCoordinate]) -> RouteDetail {
         var points = [
-            "right": GeoJSON[0].lat,
-            "left": GeoJSON[0].lat,
-            "top": GeoJSON[0].lon,
-            "bottom": GeoJSON[0].lon
+            "right": GeoJSON[0].latitude,
+            "left": GeoJSON[0].latitude,
+            "top": GeoJSON[0].longitude,
+            "bottom": GeoJSON[0].longitude
         ]
         let Radius: Double = 6371; // Radius of Earth in km
 
@@ -63,36 +52,36 @@ class Route {
         var lat1: Double
         var prevElev: Double;
 
-        lng1 = GeoJSON[0].lon * (Double.pi / 180);
-        lat1 = GeoJSON[0].lat * (Double.pi / 180);
-        prevElev = GeoJSON[0].elv;
+        lng1 = GeoJSON[0].longitude * (Double.pi / 180);
+        lat1 = GeoJSON[0].latitude * (Double.pi / 180);
+        prevElev = GeoJSON[0].elevation;
 
-        for coordinate:Coordinates in GeoJSON {
+        for coordinate:NetworkCoordinate in GeoJSON {
 
             // Check RightLngCoords
-            if (points["right"]! < coordinate.lon) {
-                points["right"] = coordinate.lon
+            if (points["right"]! < coordinate.longitude) {
+                points["right"] = coordinate.longitude
             }
             // Check LeftLngCoords
-            if (points["left"]! > coordinate.lon) {
-                points["left"] = coordinate.lon;
+            if (points["left"]! > coordinate.longitude) {
+                points["left"] = coordinate.longitude;
             }
             // Check TopLatCoords
-            if (points["top"]! < coordinate.lat) {
-                points["top"] = coordinate.lat;
+            if (points["top"]! < coordinate.latitude) {
+                points["top"] = coordinate.latitude;
             }
             // Check BottomLatCoords
-            if (points["bottom"]! > coordinate.lat) {
-                points["bottom"] = coordinate.lat;
+            if (points["bottom"]! > coordinate.latitude) {
+                points["bottom"] = coordinate.latitude;
             }
 
             // Calculate Elevation gain/loss point to point
-            totalElevation += coordinate.elv - prevElev;
-            prevElev = coordinate.elv;
+            totalElevation += coordinate.elevation - prevElev;
+            prevElev = coordinate.elevation;
 
             // Used to calculate totalDistance from previous point to current point
-            let lng2 = coordinate.lon * (Double.pi / 180);
-            let lat2 = coordinate.lat * (Double.pi / 180);
+            let lng2 = coordinate.longitude * (Double.pi / 180);
+            let lat2 = coordinate.latitude * (Double.pi / 180);
 
             let x = (lng2 - lng1) * cos((lat1 + lat2) / 2)
             let y = lat2 - lat1;
@@ -104,7 +93,7 @@ class Route {
         totalDistance = round(totalDistance * 100) / 100;
 
         // Calculate zoom distance (in metres)
-        zoom = zoom - log10(totalDistance);
+        zoom = zoom * 10000
 
 
         // Calculate the center of pointOne and pointTwo
@@ -125,24 +114,12 @@ class Route {
         return routeDetail.elevation
     }
     func getDate() -> String {
-        let startDate = Date(timeIntervalSince1970: routeInfo.start_date!)
-        guard let startTime = routeInfo.start_time?.stringFromTimeInterval() else { return "00:00:00"}
-        guard let endTime = routeInfo.end_time?.stringFromTimeInterval() else { return "00:00:00" }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM dd, yyyy"
         
-        return ("Ride Date: \(startDate): \(startTime) - \(endTime)")
+        return ("Ride Date: \(dateFormatter.string(from: routeInfo.start_date!))")
     }
-}
-
-extension TimeInterval{
-
-        func stringFromTimeInterval() -> String {
-
-            let time = NSInteger(self)
-
-            let seconds = time % 60
-            let minutes = (time / 60) % 60
-            let hours = (time / 3600)
-
-            return String(format: "%0.2d:%0.2d:%0.2d",hours,minutes,seconds)
-        }
+    func getTime() -> String {
+        return ("\(routeInfo.start_time!) - \(routeInfo.end_time!)")
+    }
 }

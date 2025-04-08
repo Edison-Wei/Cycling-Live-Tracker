@@ -20,34 +20,37 @@ import SwiftUI
 // 3. display data on the map and have a userCurrentPosition
 // 4. Figure out how to send the data to the server
 // 5. Have a cache system that stores the routeinfo to reduce calculation time and data usage
+// 6. Create a login screen (For the executives to use only)
 
 
 struct ContentView: View {
     @Environment(NetworkMonitor.self) private var networkMonitor
     @StateObject var deviceLocationService = DeviceLocationService.shared
     private let liveTrackerLocation: LiveTrackerLocation = LiveTrackerLocation()
+    private let dataController: DataController = DataController()
     
     // Timer to Send Coordinates to the database
-    @State private var timer: Timer = Timer()
+    private var timer = Timer.publish(every: 300.0, on: .main, in: .common).autoconnect()
+    @State private var timerSubscription: Cancellable? = nil
     
     @State var routeDetails: Route = Route()
     @State var tokens: Set<AnyCancellable> = []
-    @State var userCoordinates: [Coordinates] = [Coordinates(lat: 0.0, lon: 0.0, elv: 0.0)] // Do not need the inside Coordinate
+    @State var userCoordinates: [NetworkCoordinate] = [] // Do not need the inside Coordinate
     @State var markerComments: [MarkerComment] = []
     @State var coordinateCounter: Int = 0
     
     // Variables to control the view
     @State private var trackerTitle: String = "Start Tracking"
-    @State private var trackerOn: Bool = false
+    @State private var isTrackerOn: Bool = false
     @State private var isProcessing: Bool = false
     
     
     var body: some View {
-        // Create a login screen
         VStack {
-            Text("Distance: \(routeDetails.getDistance())")
             Text(routeDetails.getDate())
                 .font(.largeTitle)
+            Text(routeDetails.getTime())
+            Text("Distance: \(routeDetails.getDistance()) Elev: \(routeDetails.getElevation())")
         }
         .onAppear {
             observeCoordinateUpdates()
@@ -65,29 +68,35 @@ struct ContentView: View {
             }
             else {
                 Button(trackerTitle) {
-                    if trackerOn {
-                        trackerOn = false
+                    if isTrackerOn {
+                        isTrackerOn = false
                         trackerTitle = "Start Tracking"
                         isProcessing = true
+                        stopSendingLocationData()
                     }
                     else {
-                        trackerOn = true
+                        isTrackerOn = true
                         trackerTitle = "Finish Ride"
+                        startSendingLocationData()
                     }
-                    deviceLocationService.requestLocationServices(trackerOn)
+                    deviceLocationService.requestLocationServices(isTrackerOn)
                 }
                 .padding()
                 .border(Color.cyan, width: 2)
                 .cornerRadius(5.0)
             }
         }.onAppear {
-            if networkMonitor.isConnected {
+            if dataController.checkStoredRouteDate() {
+                let routeInfo = dataController.fetchLocalRouteInfo()
+                self.routeDetails = Route(routeInfo: routeInfo!)
+            }
+            else if networkMonitor.isConnected {
                 fetchRouteData()
             }
             else {
-                // TODO
-                // Grab from storage on device
-                //  else alert user to be connected to internet
+                while !networkMonitor.isConnected {
+                    
+                }
             }
         }
         
@@ -106,7 +115,7 @@ struct ContentView: View {
                     print(error)
                 }
             } receiveValue: { coordinates in
-                self.userCoordinates.append(Coordinates(lat: coordinates.latitude, lon: coordinates.longitude, elv: Double.nan))
+                self.userCoordinates.append(NetworkCoordinate(latitude: coordinates.latitude, longitude: coordinates.longitude, elevation: 0.0))
                 self.coordinateCounter += 1
             }
             .store(in: &tokens)
@@ -116,69 +125,67 @@ struct ContentView: View {
         deviceLocationService.deniedLocationAccessPublisher
             .receive(on: DispatchQueue.main)
             .sink {
-                print("Alert")
+                print("Location Services are turned off")
             }
             .store(in: &tokens)
     }
     
-    func startSending() {
-        timer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
-            liveTrackerLocation.postCurrentCoordinate(userCurrentCoordinate: userCoordinates.last!)
+    func startSendingLocationData() {
+        timerSubscription = timer.sink { _ in
+            if !userCoordinates.isEmpty {
+                    liveTrackerLocation.postCurrentCoordinate(userCurrentCoordinate: userCoordinates.last)
+            }
         }
     }
     
-    func stopSending() {
-        timer.invalidate()
+    func stopSendingLocationData() {
+        timerSubscription?.cancel()
     }
     
     func fetchRouteData() {
-        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else { return }
-//        guard let url = URL(string: "https://www.sfucycling.ca/api/grab/route/") else { return }
-        
+        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation") else { return }
         liveTrackerLocation.networkSession().dataTask(with: url) { data, response, error in
-            guard let data = data else { return }
+            guard let response = response as? HTTPURLResponse,
+                  (200...299).contains(response.statusCode)
+            else {
+                print("error", error ?? URLError(.badServerResponse))
+                return
+            }
+            guard let data = data 
+            else {
+                print("Data was not received")
+                return
+            }
+            
             do {
-                print(data)
-                let routeInfoObject = try JSONDecoder().decode(RouteInfo.self, from: data)
+                let routeInfoObject = try JSONDecoder().decode(NetworkRouteInfo.self, from: data)
+                print("From Fetch \(routeInfoObject)")
+                if routeInfoObject.isEmpty() {
+                    print("RouteInfo was not decoded properly")
+                    return
+                }
                 DispatchQueue.main.async {
+                    dataController.storeRouteInfo(routeInfo: routeInfoObject)
                     self.routeDetails = Route(routeInfo: routeInfoObject)
                 }
             } catch {
                 print(error.localizedDescription)
             }
         }.resume()
-        
-//        var apiRoute: RouteInfo = RouteInfo()
-//        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else { return RouteInfo() }
-//
-//        URLSession.shared.dataTask(with: url) { data, response, error in
-//            guard let data = data else { return }
-//            do {
-//                let routeInfoObject = try JSONDecoder().decode(RouteInfo.self, from: data)
-//                DispatchQueue.main.async {
-//                    apiRoute = routeInfoObject
-//                    self.routeInfo = routeInfoObject
-//                }
-//            } catch {
-//                print(error.localizedDescription)
-//            }
-//        }.resume()
-//        print("Printing Fetch \(apiRoute)")
-//
-//        return apiRoute
     }
     
     func postUserRouteData() {
-        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else { return }
-//        guard let url = URL(string: "https://www.sfucycling.ca/api/post/route") else { return }
+        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation") else { return }
         if userCoordinates.isEmpty || userCoordinates.count < 300 {
+            isProcessing = false
             return
         }
         var request = URLRequest(url: url)
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
-        request.httpBody = try! JSONEncoder().encode(coordinateEncoder(coordinates: userCoordinates, markerCoordinates: markerComments))
-        
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
+        request.httpBody = try! JSONEncoder().encode(CoordinateEncoder(coordinates: userCoordinates, markerCoordinates: markerComments))
+
         
         liveTrackerLocation.networkSession().dataTask(with: request) { _, response, error in
             guard

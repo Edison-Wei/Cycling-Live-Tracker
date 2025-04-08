@@ -19,4 +19,8 @@ final class NetworkMonitor {
         }
         networkMonitor.start(queue: workerQueue)
     }
+    
+    func stopMonitor() {
+        networkMonitor.cancel()
+    }
 }

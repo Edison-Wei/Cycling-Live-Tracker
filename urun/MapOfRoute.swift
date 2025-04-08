@@ -8,28 +8,29 @@ import SwiftUI
 import MapKit
 
 struct MapOfRoute: View {
-    @State var centerPosition: MapCameraPosition = .camera(MapCamera(centerCoordinate: CLLocationCoordinate2DMake(49.2790886,-122.9227544), distance: 1000, heading: 0, pitch: 0))
+    @State var centerPosition: MapCameraPosition = .camera(MapCamera(centerCoordinate: CLLocationCoordinate2DMake(49.2790886,-122.9227544), distance: 25000))
     var routeCoordinates: [CLLocationCoordinate2D] = []
-    @Binding var markerComments: [MarkerComment] // Might be a @Binding Prop
-    @Binding var userCoordinates: [Coordinates]
+    @Binding var markerComments: [MarkerComment]
+    @Binding var userCoordinates: [NetworkCoordinate]
     
     @State var toggleMarkerComment: Bool = false
+    var triggerCamera = false
     @State var message: String = ""
     
-    init(routeCoordinates: [CLLocationCoordinate2D], routeDetail: RouteDetail, userCoordinates: Binding<[Coordinates]>, markerComments: Binding<[MarkerComment]>) {
+    init(routeCoordinates: [CLLocationCoordinate2D], routeDetail: RouteDetail, userCoordinates: Binding<[NetworkCoordinate]>, markerComments: Binding<[MarkerComment]>) {
         self._userCoordinates = userCoordinates
         self._markerComments = markerComments
-        self.centerPosition = .camera(MapCamera(centerCoordinate: CLLocationCoordinate2DMake(59.2314, -125.2452), distance: 10, heading: 0, pitch: 0))
-//        self.centerPosition = .camera(MapCamera(centerCoordinate: CLLocationCoordinate2DMake(routeDetail.latitude, routeDetail.longitude), distance: routeDetail.zoom, heading: 0, pitch: 0))
+        self.centerPosition = .camera(MapCamera(centerCoordinate: CLLocationCoordinate2DMake(routeDetail.latitude, routeDetail.longitude), distance: routeDetail.zoom))
         self.routeCoordinates = routeCoordinates
+        self.triggerCamera = true
     }
     
     var body: some View {
         ZStack {
-            Map(position: self.$centerPosition) {
-                MapPolyline(coordinates: self.routeCoordinates)
+            Map(position: $centerPosition) {
+                MapPolyline(coordinates: self.routeCoordinates).stroke(.red, lineWidth: 2)
                 ForEach(markerComments) { ( markerComment: MarkerComment ) in
-                    Marker(coordinate: CLLocationCoordinate2D(latitude: 59.2314, longitude: -125.2452)) {
+                    Marker(coordinate: markerComment.coordinate) {
                         Label(markerComment.comment, systemImage: "mappin")
                     }
                 }
@@ -78,17 +79,17 @@ struct MapOfRoute: View {
             }
         }
     }
-    
+        
     // This function can be removed if battery and data usage is heavily impacted
     func postMarkerComment() {
-        let userCurrentCoordinate: Coordinates = userCoordinates.last!
-        let newMarkerComment = MarkerComment(coordinate: CLLocationCoordinate2D(latitude: userCurrentCoordinate.lat, longitude: userCurrentCoordinate.lon), comment: message)
+        let userCurrentCoordinate: NetworkCoordinate = userCoordinates.last!
+        let newMarkerComment = MarkerComment(coordinate: CLLocationCoordinate2D(latitude: userCurrentCoordinate.latitude, longitude: userCurrentCoordinate.longitude), comment: message)
         
-        // Change URL
-        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else { return }
+        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/CommentMarker") else { return }
         var request = URLRequest(url: url)
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
         request.httpBody = try! JSONEncoder().encode(newMarkerComment)
         
         URLSession.shared.dataTask(with: request) { _, response, error in

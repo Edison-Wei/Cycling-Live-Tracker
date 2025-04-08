@@ -10,11 +10,13 @@ import SwiftUI
 @main
 struct urunApp: App {
     @State private var networkMonitor = NetworkMonitor()
+    @StateObject private var dataController = DataController()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(networkMonitor)
+                .environmentObject(dataController)
         }
     }
 }

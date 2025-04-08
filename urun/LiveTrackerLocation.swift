@@ -8,10 +8,10 @@
 import SwiftUI
 
 class LiveTrackerLocation: ObservableObject {
-    private var coordinatesNotSent: [Coordinates] = []
+    private var coordinatesNotSent: [NetworkCoordinate] = []
     
     // Connection to the database
-    private let url: URL? = URL(string: "https://jsonplaceholder.typicode.com/posts") // Change URL
+    private let url: URL? = URL(string: "https://www.sfucycling.ca/api/ClubActivity/LiveTrackerConnection") // Change URL
     private let sessionManager: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 30
@@ -23,15 +23,22 @@ class LiveTrackerLocation: ObservableObject {
         return sessionManager
     }
     
-    func postCurrentCoordinate(userCurrentCoordinate: Coordinates) {
-        coordinatesNotSent.append(userCurrentCoordinate)
+    func postCurrentCoordinate(userCurrentCoordinate: NetworkCoordinate?) {
+        if let lastKnownLocation = userCurrentCoordinate {
+            coordinatesNotSent.append(lastKnownLocation)
+        }
+        else {
+            print("User Coordinate could not be received")
+            return
+        }
         
         if url == nil {
             return
         }
         var request = URLRequest(url: url!)
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.httpMethod = "POST"
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
         request.httpBody = try! JSONEncoder().encode(coordinatesNotSent)
         
         sessionManager.dataTask(with: request) { _, response, error in
