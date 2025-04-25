@@ -2,7 +2,7 @@
 //  RouteInfo+CoreDataProperties.swift
 //  CyclingLiveTracker
 //
-//  Created by Edison Wei on 2025-04-07.
+//  Created by Edison Wei on 2025-04-23.
 //
 //
 
@@ -17,10 +17,11 @@ extension RouteInfo {
     }
 
     @NSManaged public var distance: Double
+    @NSManaged public var end_time: String?
     @NSManaged public var start_date: Date?
     @NSManaged public var start_time: String?
-    @NSManaged public var end_time: String?
     @NSManaged public var gpx: Set<Coordinate>
+    @NSManaged public var markers: Set<MarkerCoordinate>
 
 }
 
@@ -41,6 +42,19 @@ extension RouteInfo {
 
 }
 
-extension RouteInfo : Identifiable {
+// MARK: Generated accessors for markers
+extension RouteInfo {
+
+    @objc(addMarkersObject:)
+    @NSManaged public func addToMarkers(_ value: MarkerCoordinate)
+
+    @objc(removeMarkersObject:)
+    @NSManaged public func removeFromMarkers(_ value: MarkerCoordinate)
+
+    @objc(addMarkers:)
+    @NSManaged public func addToMarkers(_ values: NSSet)
+
+    @objc(removeMarkers:)
+    @NSManaged public func removeFromMarkers(_ values: NSSet)
 
 }

@@ -36,15 +36,30 @@ class DataController: ObservableObject {
             }
             let ifRouteShouldBeFetched = todayDate <= (storedRoute.first?.start_date)!
             return ifRouteShouldBeFetched
-        }
-        catch {
+        } catch {
             print("Error fetching route data: \(error)")
             return false
         }
     }
+    
+    func getRouteDate() -> Date {
+        let context = persistentContainer.viewContext
+        let fetchRequest: NSFetchRequest<RouteInfo> = RouteInfo.fetchRequest()
+        fetchRequest.fetchLimit = 1
+        
+        do {
+            let storedRoute = try context.fetch(fetchRequest)
+            
+            return (storedRoute.first?.start_date)!
+        } catch {
+            print("Error fetching route data: \(error)")
+            return Date.now
+        }
+
+    }
 
     // Store RouteInfo in Core Data
-    public func storeRouteInfo(routeInfo: NetworkRouteInfo) {
+    func storeRouteInfo(routeInfo: NetworkRouteInfo) {
         let context = persistentContainer.viewContext
 
         // Delete existing data before storing new data
@@ -66,6 +81,15 @@ class DataController: ObservableObject {
             coordinateEntity.elevation = coordinatePoint.elevation
             routeInfoEntity.addToGpx(coordinateEntity)
             coordID += 1
+        }
+        
+        for markerCoordinatePoint in routeInfo.markerCoordinates {
+            let markerCommentEntity = MarkerCoordinate(context: context)
+            markerCommentEntity.id = markerCoordinatePoint.id
+            markerCommentEntity.message = markerCoordinatePoint.message
+            markerCommentEntity.latitude = markerCoordinatePoint.coordinate.latitude
+            markerCommentEntity.longitude = markerCoordinatePoint.coordinate.longitude
+            routeInfoEntity.addToMarkers(markerCommentEntity)
         }
         
 

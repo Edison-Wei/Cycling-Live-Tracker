@@ -12,6 +12,7 @@ class DeviceLocationService: NSObject, CLLocationManagerDelegate, ObservableObje
     
     var coordinatesPublisher = PassthroughSubject<CLLocationCoordinate2D, Error>()
     var deniedLocationAccessPublisher = PassthroughSubject<Void, Never>()
+    var backgroundServices = CLBackgroundActivitySession()
     
     private override init() {
         super.init()

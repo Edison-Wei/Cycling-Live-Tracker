@@ -49,6 +49,13 @@
             ReferencedContainer = "container:CyclingLiveTracker.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "LiveTrackerID"
+            value = "H$4!5@N9@$%0"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

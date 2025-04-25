@@ -7,11 +7,19 @@
         <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <relationship name="routeInfo" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RouteInfo" inverseName="gpx" inverseEntity="RouteInfo"/>
     </entity>
+    <entity name="MarkerCoordinate" representedClassName=".MarkerCoordinate" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="message" optional="YES" attributeType="String"/>
+        <relationship name="routeInfo" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RouteInfo" inverseName="markers" inverseEntity="RouteInfo"/>
+    </entity>
     <entity name="RouteInfo" representedClassName=".RouteInfo" syncable="YES">
         <attribute name="distance" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="end_time" optional="YES" attributeType="String"/>
         <attribute name="start_date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="start_time" optional="YES" attributeType="String"/>
         <relationship name="gpx" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Coordinate" inverseName="routeInfo" inverseEntity="Coordinate"/>
+        <relationship name="markers" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MarkerCoordinate" inverseName="routeInfo" inverseEntity="MarkerCoordinate"/>
     </entity>
 </model>

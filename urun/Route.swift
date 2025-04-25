@@ -37,16 +37,19 @@ class Route {
      */
     func calculateGeojson(GeoJSON: [NetworkCoordinate]) -> RouteDetail {
         var points = [
-            "right": GeoJSON[0].latitude,
-            "left": GeoJSON[0].latitude,
-            "top": GeoJSON[0].longitude,
-            "bottom": GeoJSON[0].longitude
+            "right": GeoJSON[0].longitude,
+            "left": GeoJSON[0].longitude,
+            "top": GeoJSON[0].latitude,
+            "bottom": GeoJSON[0].latitude
         ]
+        print("Points from GeoJSON: \(points)")
         let Radius: Double = 6371; // Radius of Earth in km
+        let screenHeight = 2556.0
+        let screenWidth = 1179.0
 
         var totalElevation: Double = 0.0;
         var totalDistance: Double = 0.0 // in km
-        var zoom: Double = 13 // 0 space - 11 cities
+        var zoomDistance: Double = 13 // 0 space - 11 cities
 
         var lng1: Double
         var lat1: Double
@@ -91,20 +94,51 @@ class Route {
         }
         
         totalDistance = round(totalDistance * 100) / 100;
-
-        // Calculate zoom distance (in metres)
-        zoom = zoom * 10000
-
-
+        
         // Calculate the center of pointOne and pointTwo
         let lat = (points["top"]! + points["bottom"]!) / 2;
         let lng = (points["right"]! + points["left"]!) / 2;
+        let latInRadians = lat * Double.pi / 180
+        
 
-        return RouteDetail(totalDistance: totalDistance, latitude: lat, longitude: lng, zoom: zoom, elevation: totalElevation)
+        // Calculate zoom distance (in metres)
+        var deltaLat = points["top"]! - points["bottom"]!
+        var deltaLng = points["left"]! - points["right"]!
+        if deltaLat < 0 {
+            deltaLat *= -1
+        }
+        if deltaLng < 0 {
+            deltaLng *= -1
+        }
+        
+        let zoomWidth = log2((screenWidth * 360.0) / (deltaLng * 256.0))
+        let zoomHeight = log2((screenHeight * 360.0 * cos(latInRadians)) / (deltaLat * 256.0))
+        let z: Double = floor(min(zoomWidth, zoomHeight))
+        
+        zoomDistance = ((40075017.0 * cos(latInRadians)) / (pow(2, z) * 256)) * 3000.0
+        
+        
+        print("deltaLat: \(deltaLat)")
+        print("deltaLng: \(deltaLng)")
+        print("zoomWidth: \(zoomWidth)")
+        print("zoomHeight: \(zoomHeight)")
+        print("z: \(z)")
+        print("zoomDistance: \(zoomDistance)")
+        
+        print("Points from GeoJSON: \(points)")
+        print("Calc lat: \(lat)")
+        print("Calc lng: \(lng)")
+        print("Calc zoom: \(zoomDistance)")
+
+        return RouteDetail(totalDistance: totalDistance, latitude: lat, longitude: lng, zoom: zoomDistance, elevation: totalElevation)
     }
     
     func getRouteDetail() -> RouteDetail {
         return routeDetail
+    }
+    
+    func getRouteInfo() -> NetworkRouteInfo {
+        return routeInfo
     }
     
     func getDistance() -> Double {
@@ -119,7 +153,13 @@ class Route {
         
         return ("Ride Date: \(dateFormatter.string(from: routeInfo.start_date!))")
     }
+    
     func getTime() -> String {
-        return ("\(routeInfo.start_time!) - \(routeInfo.end_time!)")
+        return ("\(routeInfo.start_time!.prefix(5)) - \(routeInfo.end_time!.prefix(5))")
     }
+    
+    func isRouteReceived() -> Bool {
+        return !routeInfo.isEmpty()
+    }
+    
 }

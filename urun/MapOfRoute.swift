@@ -8,10 +8,11 @@ import SwiftUI
 import MapKit
 
 struct MapOfRoute: View {
-    @State var centerPosition: MapCameraPosition = .camera(MapCamera(centerCoordinate: CLLocationCoordinate2DMake(49.2790886,-122.9227544), distance: 25000))
+    @State var centerPosition: MapCameraPosition
     var routeCoordinates: [CLLocationCoordinate2D] = []
     @Binding var markerComments: [MarkerComment]
     @Binding var userCoordinates: [NetworkCoordinate]
+    let routeDetail: RouteDetail
     
     @State var toggleMarkerComment: Bool = false
     var triggerCamera = false
@@ -20,7 +21,9 @@ struct MapOfRoute: View {
     init(routeCoordinates: [CLLocationCoordinate2D], routeDetail: RouteDetail, userCoordinates: Binding<[NetworkCoordinate]>, markerComments: Binding<[MarkerComment]>) {
         self._userCoordinates = userCoordinates
         self._markerComments = markerComments
-        self.centerPosition = .camera(MapCamera(centerCoordinate: CLLocationCoordinate2DMake(routeDetail.latitude, routeDetail.longitude), distance: routeDetail.zoom))
+        self.routeDetail = routeDetail
+        let initialCamera = MapCamera(centerCoordinate: CLLocationCoordinate2D(latitude: routeDetail.latitude, longitude: routeDetail.longitude), distance: routeDetail.zoom)
+        self._centerPosition = State(initialValue: .camera(initialCamera))
         self.routeCoordinates = routeCoordinates
         self.triggerCamera = true
     }
@@ -31,12 +34,20 @@ struct MapOfRoute: View {
                 MapPolyline(coordinates: self.routeCoordinates).stroke(.red, lineWidth: 2)
                 ForEach(markerComments) { ( markerComment: MarkerComment ) in
                     Marker(coordinate: markerComment.coordinate) {
-                        Label(markerComment.comment, systemImage: "mappin")
+                        Label(markerComment.message, systemImage: "mappin")
                     }
                 }
             }
+            .ignoresSafeArea()
             .mapControls {
                 MapUserLocationButton()
+            }
+            .onMapCameraChange { context in
+                print("\(context.camera.centerCoordinate)")
+                print("\(centerPosition.camera?.centerCoordinate)")
+                print("latitude: \(routeDetail.latitude)")
+                print("longitude: \(routeDetail.longitude)")
+                print("zoom: \(routeDetail.zoom)")
             }
             Button {
                 toggleMarkerComment.toggle()
@@ -76,6 +87,16 @@ struct MapOfRoute: View {
                 .background(.white)
                 .clipShape(.rect(cornerRadius: 20, style: .circular))
                 .padding(EdgeInsets(top: 0, leading: 20, bottom: 2, trailing: 20))
+//                .padding(.vertical) // Add vertical padding
+//                .font(.callout)
+//                // Consider removing the border inside HStack and applying background/overlay to VStack
+//            }
+//            .padding() // Add padding around the entire VStack content
+//            .background(.white)
+//            .clipShape(RoundedRectangle(cornerRadius: 20)) // Use RoundedRectangle directly
+//            .overlay(RoundedRectangle(cornerRadius: 20).strokeBorder(.black, lineWidth: 1.5) )
+//            .padding(EdgeInsets(top: 0, leading: 20, bottom: 2, trailing: 20))
+//            .shadow(radius: 5) // Add a subtle shadow maybe
             }
         }
     }
@@ -83,7 +104,7 @@ struct MapOfRoute: View {
     // This function can be removed if battery and data usage is heavily impacted
     func postMarkerComment() {
         let userCurrentCoordinate: NetworkCoordinate = userCoordinates.last!
-        let newMarkerComment = MarkerComment(coordinate: CLLocationCoordinate2D(latitude: userCurrentCoordinate.latitude, longitude: userCurrentCoordinate.longitude), comment: message)
+        let newMarkerComment = MarkerComment(coordinate: CLLocationCoordinate2D(latitude: userCurrentCoordinate.latitude, longitude: userCurrentCoordinate.longitude), message: message)
         
         guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/CommentMarker") else { return }
         var request = URLRequest(url: url)
@@ -105,5 +126,11 @@ struct MapOfRoute: View {
                 message = ""
             }
         }.resume()
+    }
+}
+
+extension Map {
+    func zoomLevel() {
+        
     }
 }

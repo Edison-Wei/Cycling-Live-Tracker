@@ -28,6 +28,7 @@ struct ContentView: View {
     @StateObject var deviceLocationService = DeviceLocationService.shared
     private let liveTrackerLocation: LiveTrackerLocation = LiveTrackerLocation()
     private let dataController: DataController = DataController()
+    let liveTrackerID = ProcessInfo.processInfo.environment["LiveTrackerID"] ?? ""
     
     // Timer to Send Coordinates to the database
     private var timer = Timer.publish(every: 300.0, on: .main, in: .common).autoconnect()
@@ -37,13 +38,11 @@ struct ContentView: View {
     @State var tokens: Set<AnyCancellable> = []
     @State var userCoordinates: [NetworkCoordinate] = [] // Do not need the inside Coordinate
     @State var markerComments: [MarkerComment] = []
-    @State var coordinateCounter: Int = 0
     
     // Variables to control the view
     @State private var trackerTitle: String = "Start Tracking"
     @State private var isTrackerOn: Bool = false
     @State private var isProcessing: Bool = false
-    
     
     var body: some View {
         VStack {
@@ -86,25 +85,43 @@ struct ContentView: View {
                 .cornerRadius(5.0)
             }
         }.onAppear {
-            if dataController.checkStoredRouteDate() {
-                let routeInfo = dataController.fetchLocalRouteInfo()
-                self.routeDetails = Route(routeInfo: routeInfo!)
-            }
-            else if networkMonitor.isConnected {
+            if networkMonitor.isConnected {
                 fetchRouteData()
             }
             else {
-                while !networkMonitor.isConnected {
-                    
+                if dataController.checkStoredRouteDate() {
+                    let routeInfo = dataController.fetchLocalRouteInfo()
+                    self.routeDetails = Route(routeInfo: routeInfo!)
+                }
+                else {
+                    while !networkMonitor.isConnected {
+                        // send alert to connect then
+                    }
+                    fetchRouteData()
                 }
             }
+            
+//            if dataController.checkStoredRouteDate() {
+//                let routeInfo = dataController.fetchLocalRouteInfo()
+//                self.routeDetails = Route(routeInfo: routeInfo!)
+//            }
+//            else if networkMonitor.isConnected {
+//                fetchRouteData()
+//            }
+//            else {
+//                while !networkMonitor.isConnected {
+//                    
+//                }
+//            }
         }
         
-        MapOfRoute(
-            routeCoordinates: routeDetails.getCLLocationCoordinates2D(),
-            routeDetail: routeDetails.getRouteDetail(),
-            userCoordinates: $userCoordinates,
-            markerComments: $markerComments)
+        if routeDetails.isRouteReceived() {
+            MapOfRoute(
+                routeCoordinates: routeDetails.getCLLocationCoordinates2D(),
+                routeDetail: routeDetails.getRouteDetail(),
+                userCoordinates: $userCoordinates,
+                markerComments: $markerComments)
+        }
     }
     
     func observeCoordinateUpdates() {
@@ -116,7 +133,6 @@ struct ContentView: View {
                 }
             } receiveValue: { coordinates in
                 self.userCoordinates.append(NetworkCoordinate(latitude: coordinates.latitude, longitude: coordinates.longitude, elevation: 0.0))
-                self.coordinateCounter += 1
             }
             .store(in: &tokens)
     }
@@ -143,8 +159,15 @@ struct ContentView: View {
     }
     
     func fetchRouteData() {
-        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation") else { return }
+        let routeDate = dataController.getRouteDate()
+        print(routeDate.ISO8601Format())
+        
+        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation?id=\(liveTrackerID)&route_date=\(routeDate.ISO8601Format())") else { return }
+        
         liveTrackerLocation.networkSession().dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("Network Error: \(error.localizedDescription)")
+            }
             guard let response = response as? HTTPURLResponse,
                   (200...299).contains(response.statusCode)
             else {
@@ -157,11 +180,18 @@ struct ContentView: View {
                 return
             }
             
+            if response.statusCode == 202 {
+                DispatchQueue.main.async {
+                    let routeInfo = dataController.fetchLocalRouteInfo()
+                    self.routeDetails = Route(routeInfo: routeInfo!)
+                }
+                return
+            }
+            
             do {
                 let routeInfoObject = try JSONDecoder().decode(NetworkRouteInfo.self, from: data)
                 print("From Fetch \(routeInfoObject)")
                 if routeInfoObject.isEmpty() {
-                    print("RouteInfo was not decoded properly")
                     return
                 }
                 DispatchQueue.main.async {
@@ -169,6 +199,8 @@ struct ContentView: View {
                     self.routeDetails = Route(routeInfo: routeInfoObject)
                 }
             } catch {
+                // Fix still
+                print("RouteInfo was not decoded properly")
                 print(error.localizedDescription)
             }
         }.resume()
@@ -176,15 +208,20 @@ struct ContentView: View {
     
     func postUserRouteData() {
         guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation") else { return }
-        if userCoordinates.isEmpty || userCoordinates.count < 300 {
+        if userCoordinates.isEmpty || userCoordinates.count < 10 {
             isProcessing = false
             return
         }
+        // Push the Route Start and end markers aswell
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
         request.httpBody = try! JSONEncoder().encode(CoordinateEncoder(coordinates: userCoordinates, markerCoordinates: markerComments))
+        
+        let jsonEncoded = try! JSONEncoder().encode(CoordinateEncoder(coordinates: userCoordinates, markerCoordinates: markerComments))
+        
+        print(jsonEncoded)
 
         
         liveTrackerLocation.networkSession().dataTask(with: request) { _, response, error in

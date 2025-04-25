@@ -2,7 +2,7 @@
 //  Coordinate+CoreDataProperties.swift
 //  CyclingLiveTracker
 //
-//  Created by Edison Wei on 2025-04-07.
+//  Created by Edison Wei on 2025-04-22.
 //
 //
 
@@ -16,10 +16,10 @@ extension Coordinate {
         return NSFetchRequest<Coordinate>(entityName: "Coordinate")
     }
 
-    @NSManaged public var latitude: Double
-    @NSManaged public var longitude: Double
     @NSManaged public var elevation: Double
     @NSManaged public var id: Int16
+    @NSManaged public var latitude: Double
+    @NSManaged public var longitude: Double
     @NSManaged public var routeInfo: RouteInfo?
 
 }
