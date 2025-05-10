@@ -10,7 +10,7 @@ import CoreLocation
 
 class DeviceLocationService: NSObject, CLLocationManagerDelegate, ObservableObject {
     
-    var coordinatesPublisher = PassthroughSubject<CLLocationCoordinate2D, Error>()
+    var coordinatesPublisher = PassthroughSubject<SendableCoordinates, Error>()
     var deniedLocationAccessPublisher = PassthroughSubject<Void, Never>()
     var backgroundServices = CLBackgroundActivitySession()
     
@@ -24,6 +24,7 @@ class DeviceLocationService: NSObject, CLLocationManagerDelegate, ObservableObje
         let manager = CLLocationManager()
         manager.desiredAccuracy = kCLLocationAccuracyBest
         manager.delegate = self
+        manager.allowsBackgroundLocationUpdates = true
         return manager
     } ()
     
@@ -55,11 +56,17 @@ class DeviceLocationService: NSObject, CLLocationManagerDelegate, ObservableObje
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        coordinatesPublisher.send(location.coordinate)
+        coordinatesPublisher.send(SendableCoordinates(coordinate: location.coordinate, altitude: location.altitude))
+        // location has altitude but idk how to send
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         coordinatesPublisher.send(completion: .failure(error))
     }
     
+}
+
+struct SendableCoordinates {
+    let coordinate: CLLocationCoordinate2D
+    let altitude: Double
 }

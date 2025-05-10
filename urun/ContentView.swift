@@ -25,18 +25,14 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(NetworkMonitor.self) private var networkMonitor
+    @StateObject var activityTracker: ActivityTracker = ActivityTracker()
     @StateObject var deviceLocationService = DeviceLocationService.shared
-    private let liveTrackerLocation: LiveTrackerLocation = LiveTrackerLocation()
     private let dataController: DataController = DataController()
     let liveTrackerID = ProcessInfo.processInfo.environment["LiveTrackerID"] ?? ""
     
-    // Timer to Send Coordinates to the database
-    private var timer = Timer.publish(every: 300.0, on: .main, in: .common).autoconnect()
-    @State private var timerSubscription: Cancellable? = nil
-    
     @State var routeDetails: Route = Route()
     @State var tokens: Set<AnyCancellable> = []
-    @State var userCoordinates: [NetworkCoordinate] = [] // Do not need the inside Coordinate
+    @State var userCoordinates: [NetworkCoordinate] = []
     @State var markerComments: [MarkerComment] = []
     
     // Variables to control the view
@@ -44,85 +40,182 @@ struct ContentView: View {
     @State private var isTrackerOn: Bool = false
     @State private var isProcessing: Bool = false
     
+    @State var drawerOffset: CGFloat = 0
+    
+    private func snapPosition(geometry: GeometryProxy, position: DrawerPosition) -> CGFloat {
+        switch position {
+        case .hidden:
+            return geometry.size.height // Position the top of the drawer off-screen
+        case .quarter:
+            return geometry.size.height * 0.75 // 25% visible from the bottom
+        case .full:
+            return 0 // Position the top of the drawer at the top of the screen
+        }
+    }
+    
+    enum DrawerPosition {
+        case hidden
+        case quarter
+        case full
+    }
+    
+    @State private var currentSnapPosition: DrawerPosition = .quarter
+    
     var body: some View {
-        VStack {
-            Text(routeDetails.getDate())
-                .font(.largeTitle)
-            Text(routeDetails.getTime())
-            Text("Distance: \(routeDetails.getDistance()) Elev: \(routeDetails.getElevation())")
+        GeometryReader { geometry in
+            ZStack(alignment: .bottom) {
+                if routeDetails.isRouteReceived() {
+                    MapOfRouteView(
+                        routeCoordinates: routeDetails.getCLLocationCoordinates2D(),
+                        routeDetail: routeDetails.getRouteDetail(),
+                        markersSBE: routeDetails.getMarkerComments(),
+                        userCoordinates: $userCoordinates,
+                        markerComments: $markerComments)
+                }
+                
+                
+                DrawerMenuView(route: routeDetails, userCoordinate: $userCoordinates , markerComments: $markerComments)
+                    .environmentObject(activityTracker)
+                    .frame(height: geometry.size.height)
+                    .offset(y: drawerOffset)
+                    .animation(.interactiveSpring(), value: drawerOffset)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in drawerOffset = value.translation.height + snapPosition(geometry: geometry, position: currentSnapPosition)
+                            }
+                            .onEnded { value in
+                                let dragVelocity = value.predictedEndTranslation.height
+                                let currentHeight = geometry.size.height - drawerOffset
+                                
+                                if dragVelocity > 500 { // Fast Swipe away
+                                    currentSnapPosition = .hidden
+                                }
+                                else if dragVelocity < -500 { // Fast Swipe content
+                                    currentSnapPosition = .full
+                                }
+                                else {
+                                    let hiddenHeight = geometry.size.height
+                                    let quarterHeight = geometry.size.height * 0.25
+                                    let fullHeight = geometry.size.height
+
+                                    let snapHeights = [hiddenHeight, quarterHeight, fullHeight]
+                                    let closestSnapHeight = snapHeights.min(by: { abs($0 - currentHeight) < abs($1 - currentHeight) })!
+
+                                    if closestSnapHeight == hiddenHeight {
+                                        currentSnapPosition = .hidden
+                                    } else if closestSnapHeight == quarterHeight {
+                                        currentSnapPosition = .quarter
+                                    } else {
+                                        currentSnapPosition = .full
+                                    }
+                                }
+                                drawerOffset = snapPosition(geometry: geometry, position: currentSnapPosition)
+                            }
+                    )
+                    .onAppear {
+                        drawerOffset = snapPosition(geometry: geometry, position: .quarter)
+                        if networkMonitor.isConnected {
+                            fetchRouteData()
+                        }
+                        else {
+                            if dataController.checkStoredRouteDate() {
+                                let routeInfo = dataController.fetchLocalRouteInfo()
+                                self.routeDetails = Route(routeInfo: routeInfo!)
+                            }
+                            else {
+                                while !networkMonitor.isConnected {
+                                    // send alert to connect
+                                }
+                                fetchRouteData()
+                            }
+                        }
+                        observeCoordinateUpdates()
+                        observeLocationAccessDenied()
+                    }
+            }
         }
-        .onAppear {
-            observeCoordinateUpdates()
-            observeLocationAccessDenied()
-        }
-        
-        VStack {
-            if isProcessing {
-                ZStack {
-                    ProgressView()
-                }
-                .onAppear {
-                    postUserRouteData()
-                }.padding()
-            }
-            else {
-                Button(trackerTitle) {
-                    if isTrackerOn {
-                        isTrackerOn = false
-                        trackerTitle = "Start Tracking"
-                        isProcessing = true
-                        stopSendingLocationData()
-                    }
-                    else {
-                        isTrackerOn = true
-                        trackerTitle = "Finish Ride"
-                        startSendingLocationData()
-                    }
-                    deviceLocationService.requestLocationServices(isTrackerOn)
-                }
-                .padding()
-                .border(Color.cyan, width: 2)
-                .cornerRadius(5.0)
-            }
-        }.onAppear {
-            if networkMonitor.isConnected {
-                fetchRouteData()
-            }
-            else {
-                if dataController.checkStoredRouteDate() {
-                    let routeInfo = dataController.fetchLocalRouteInfo()
-                    self.routeDetails = Route(routeInfo: routeInfo!)
-                }
-                else {
-                    while !networkMonitor.isConnected {
-                        // send alert to connect then
-                    }
-                    fetchRouteData()
-                }
-            }
-            
-//            if dataController.checkStoredRouteDate() {
-//                let routeInfo = dataController.fetchLocalRouteInfo()
-//                self.routeDetails = Route(routeInfo: routeInfo!)
+    }
+    
+    
+//    var body: some View {
+//        VStack {
+//            Text(routeDetails.getDate())
+//                .font(.largeTitle)
+//            Text(routeDetails.getTime())
+//            Text("Distance: \(routeDetails.getDistance()) Elev: \(routeDetails.getElevation())")
+//        }
+//        .onAppear {
+//            observeCoordinateUpdates()
+//            observeLocationAccessDenied()
+//        }
+//        
+//        VStack {
+//            if isProcessing {
+//                ZStack {
+//                    ProgressView()
+//                }
+//                .onAppear {
+//                    postUserRouteData()
+//                }.padding()
 //            }
-//            else if networkMonitor.isConnected {
+//            else {
+//                Button(trackerTitle) {
+//                    if isTrackerOn {
+//                        isTrackerOn = false
+//                        trackerTitle = "Start Tracking"
+//                        isProcessing = true
+//                        stopSendingLocationData()
+//                    }
+//                    else {
+//                        isTrackerOn = true
+//                        trackerTitle = "Finish Ride"
+//                        startSendingLocationData()
+//                    }
+//                    deviceLocationService.requestLocationServices(isTrackerOn)
+//                }
+//                .padding()
+//                .border(Color.cyan, width: 2)
+//                .cornerRadius(5.0)
+//            }
+//        }.onAppear {
+//            if networkMonitor.isConnected {
 //                fetchRouteData()
 //            }
 //            else {
-//                while !networkMonitor.isConnected {
-//                    
+//                if dataController.checkStoredRouteDate() {
+//                    let routeInfo = dataController.fetchLocalRouteInfo()
+//                    self.routeDetails = Route(routeInfo: routeInfo!)
+//                }
+//                else {
+//                    while !networkMonitor.isConnected {
+//                        // send alert to connect then
+//                    }
+//                    fetchRouteData()
 //                }
 //            }
-        }
-        
-        if routeDetails.isRouteReceived() {
-            MapOfRoute(
-                routeCoordinates: routeDetails.getCLLocationCoordinates2D(),
-                routeDetail: routeDetails.getRouteDetail(),
-                userCoordinates: $userCoordinates,
-                markerComments: $markerComments)
-        }
-    }
+//            
+////            if dataController.checkStoredRouteDate() {
+////                let routeInfo = dataController.fetchLocalRouteInfo()
+////                self.routeDetails = Route(routeInfo: routeInfo!)
+////            }
+////            else if networkMonitor.isConnected {
+////                fetchRouteData()
+////            }
+////            else {
+////                while !networkMonitor.isConnected {
+////                    
+////                }
+////            }
+//        }
+//        
+//        if routeDetails.isRouteReceived() {
+//            MapOfRoute(
+//                routeCoordinates: routeDetails.getCLLocationCoordinates2D(),
+//                routeDetail: routeDetails.getRouteDetail(),
+//                userCoordinates: $userCoordinates,
+//                markerComments: $markerComments)
+//        }
+//    }
     
     func observeCoordinateUpdates() {
         deviceLocationService.coordinatesPublisher
@@ -132,7 +225,10 @@ struct ContentView: View {
                     print(error)
                 }
             } receiveValue: { coordinates in
-                self.userCoordinates.append(NetworkCoordinate(latitude: coordinates.latitude, longitude: coordinates.longitude, elevation: 0.0))
+                print("Current coordinate: \(coordinates)")
+                print("Coordinate count: \(userCoordinates.count)")
+                
+                self.userCoordinates.append(NetworkCoordinate(latitude: coordinates.coordinate.latitude, longitude: coordinates.coordinate.longitude, elevation: coordinates.altitude))
             }
             .store(in: &tokens)
     }
@@ -146,25 +242,14 @@ struct ContentView: View {
             .store(in: &tokens)
     }
     
-    func startSendingLocationData() {
-        timerSubscription = timer.sink { _ in
-            if !userCoordinates.isEmpty {
-                    liveTrackerLocation.postCurrentCoordinate(userCurrentCoordinate: userCoordinates.last)
-            }
-        }
-    }
-    
-    func stopSendingLocationData() {
-        timerSubscription?.cancel()
-    }
-    
     func fetchRouteData() {
         let routeDate = dataController.getRouteDate()
         print(routeDate.ISO8601Format())
         
-        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation?id=\(liveTrackerID)&route_date=\(routeDate.ISO8601Format())") else { return }
+//        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation?id=\(liveTrackerID)&route_date=\(routeDate.ISO8601Format())") else { return }
+        guard let url = URL(string: "http://localhost:3000/api/ClubActivity/RouteInformation?id=\(liveTrackerID)&route_date=\(routeDate.ISO8601Format())") else { return }
         
-        liveTrackerLocation.networkSession().dataTask(with: url) { data, response, error in
+        URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
                 print("Network Error: \(error.localizedDescription)")
             }
@@ -203,37 +288,6 @@ struct ContentView: View {
                 print("RouteInfo was not decoded properly")
                 print(error.localizedDescription)
             }
-        }.resume()
-    }
-    
-    func postUserRouteData() {
-        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation") else { return }
-        if userCoordinates.isEmpty || userCoordinates.count < 10 {
-            isProcessing = false
-            return
-        }
-        // Push the Route Start and end markers aswell
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
-        request.httpBody = try! JSONEncoder().encode(CoordinateEncoder(coordinates: userCoordinates, markerCoordinates: markerComments))
-        
-        let jsonEncoded = try! JSONEncoder().encode(CoordinateEncoder(coordinates: userCoordinates, markerCoordinates: markerComments))
-        
-        print(jsonEncoded)
-
-        
-        liveTrackerLocation.networkSession().dataTask(with: request) { _, response, error in
-            guard
-                let _ = response as? HTTPURLResponse,
-                error == nil
-            else {
-                isProcessing = false
-                print("error", error ?? URLError(.badServerResponse))
-                return
-            }
-            
         }.resume()
     }
 }

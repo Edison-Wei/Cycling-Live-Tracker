@@ -7,21 +7,16 @@
 
 import SwiftUI
 
-class LiveTrackerLocation: ObservableObject {
+class LiveTrackerLocation {
     private var coordinatesNotSent: [NetworkCoordinate] = []
     
     // Connection to the database
-    private let url: URL? = URL(string: "https://www.sfucycling.ca/api/ClubActivity/LiveTrackerConnection") // Change URL
-    private let sessionManager: URLSession = {
+    let sessionManager: URLSession = {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 30
         return URLSession(configuration: configuration)
     }()
-    
-    func networkSession() -> URLSession {
-        return sessionManager
-    }
     
     func postCurrentCoordinate(userCurrentCoordinate: NetworkCoordinate?) {
         if let lastKnownLocation = userCurrentCoordinate {
@@ -31,14 +26,13 @@ class LiveTrackerLocation: ObservableObject {
             print("User Coordinate could not be received")
             return
         }
+//        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/LiveTrackerConnection") else { return } // Change URL
+        guard let url = URL(string: "http://localhost:3000/api/ClubActivity/LiveTrackerConnection") else { return } // Change URL
         
-        if url == nil {
-            return
-        }
-        var request = URLRequest(url: url!)
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
+        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.setValue("bearer: \(ProcessInfo.processInfo.environment["LiveTrackerID"]!)", forHTTPHeaderField: "Authorization")
         request.httpBody = try! JSONEncoder().encode(coordinatesNotSent)
         
         sessionManager.dataTask(with: request) { _, response, error in

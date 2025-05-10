@@ -47,17 +47,14 @@ class Route {
         let screenHeight = 2556.0
         let screenWidth = 1179.0
 
-        var totalElevation: Double = 0.0;
+        var elevationGain: Double = 0.0;
+        var elevationDecline: Double = 0.0;
         var totalDistance: Double = 0.0 // in km
         var zoomDistance: Double = 13 // 0 space - 11 cities
 
-        var lng1: Double
-        var lat1: Double
-        var prevElev: Double;
-
-        lng1 = GeoJSON[0].longitude * (Double.pi / 180);
-        lat1 = GeoJSON[0].latitude * (Double.pi / 180);
-        prevElev = GeoJSON[0].elevation;
+        var lng1: Double = GeoJSON[0].longitude * (Double.pi / 180);
+        var lat1: Double = GeoJSON[0].latitude * (Double.pi / 180);
+        var prevElev: Double = GeoJSON[0].elevation;
 
         for coordinate:NetworkCoordinate in GeoJSON {
 
@@ -79,7 +76,13 @@ class Route {
             }
 
             // Calculate Elevation gain/loss point to point
-            totalElevation += coordinate.elevation - prevElev;
+            let elev = coordinate.elevation - prevElev;
+            if elev > 0 {
+                elevationGain += elev
+            }
+            else {
+                elevationDecline += elev
+            }
             prevElev = coordinate.elevation;
 
             // Used to calculate totalDistance from previous point to current point
@@ -96,10 +99,9 @@ class Route {
         totalDistance = round(totalDistance * 100) / 100;
         
         // Calculate the center of pointOne and pointTwo
-        let lat = (points["top"]! + points["bottom"]!) / 2;
+        var lat = (points["top"]! + points["bottom"]!) / 2;
         let lng = (points["right"]! + points["left"]!) / 2;
         let latInRadians = lat * Double.pi / 180
-        
 
         // Calculate zoom distance (in metres)
         var deltaLat = points["top"]! - points["bottom"]!
@@ -115,7 +117,9 @@ class Route {
         let zoomHeight = log2((screenHeight * 360.0 * cos(latInRadians)) / (deltaLat * 256.0))
         let z: Double = floor(min(zoomWidth, zoomHeight))
         
-        zoomDistance = ((40075017.0 * cos(latInRadians)) / (pow(2, z) * 256)) * 3000.0
+        zoomDistance = ((40075017.0 * cos(latInRadians)) / (pow(2, z) * 256)) * 4000.0
+        
+        lat = lat - 0.0025
         
         
         print("deltaLat: \(deltaLat)")
@@ -130,7 +134,12 @@ class Route {
         print("Calc lng: \(lng)")
         print("Calc zoom: \(zoomDistance)")
 
-        return RouteDetail(totalDistance: totalDistance, latitude: lat, longitude: lng, zoom: zoomDistance, elevation: totalElevation)
+        return RouteDetail(totalDistance: totalDistance,
+                           latitude: lat,
+                           longitude: lng,
+                           zoom: zoomDistance,
+                           elevationGain: elevationGain,
+                           elevationDecline: elevationDecline)
     }
     
     func getRouteDetail() -> RouteDetail {
@@ -140,18 +149,24 @@ class Route {
     func getRouteInfo() -> NetworkRouteInfo {
         return routeInfo
     }
+    func getMarkerComments() -> [MarkerComment] {
+        return routeInfo.markerCoordinates
+    }
     
     func getDistance() -> Double {
         return routeDetail.totalDistance
     }
-    func getElevation() -> Double {
-        return routeDetail.elevation
+    func getElevationGain() -> Double {
+        return routeDetail.elevationGain
+    }
+    func getElevationDecline() -> Double {
+        return routeDetail.elevationDecline
     }
     func getDate() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM dd, yyyy"
         
-        return ("Ride Date: \(dateFormatter.string(from: routeInfo.start_date!))")
+        return ("\(dateFormatter.string(from: routeInfo.start_date!))")
     }
     
     func getTime() -> String {
@@ -162,4 +177,7 @@ class Route {
         return !routeInfo.isEmpty()
     }
     
+    func formatDistance() -> String {
+        return String(format: "%.2f km", routeDetail.totalDistance)
+    }
 }

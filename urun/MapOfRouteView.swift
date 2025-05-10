@@ -7,30 +7,39 @@
 import SwiftUI
 import MapKit
 
-struct MapOfRoute: View {
+struct MapOfRouteView: View {
     @State var centerPosition: MapCameraPosition
     var routeCoordinates: [CLLocationCoordinate2D] = []
     @Binding var markerComments: [MarkerComment]
     @Binding var userCoordinates: [NetworkCoordinate]
-    let routeDetail: RouteDetail
+    let routeDetail: RouteDetail // Do not need
+    let markersSBE: [MarkerComment]     // Markers provided by the team indicating Start, Break, End
     
     @State var toggleMarkerComment: Bool = false
-    var triggerCamera = false
+    
+    @State var messageFailedToSend: Bool = false
     @State var message: String = ""
     
-    init(routeCoordinates: [CLLocationCoordinate2D], routeDetail: RouteDetail, userCoordinates: Binding<[NetworkCoordinate]>, markerComments: Binding<[MarkerComment]>) {
+
+    
+    init(routeCoordinates: [CLLocationCoordinate2D], routeDetail: RouteDetail, markersSBE: [MarkerComment], userCoordinates: Binding<[NetworkCoordinate]>, markerComments: Binding<[MarkerComment]>) {
         self._userCoordinates = userCoordinates
         self._markerComments = markerComments
         self.routeDetail = routeDetail
         let initialCamera = MapCamera(centerCoordinate: CLLocationCoordinate2D(latitude: routeDetail.latitude, longitude: routeDetail.longitude), distance: routeDetail.zoom)
         self._centerPosition = State(initialValue: .camera(initialCamera))
         self.routeCoordinates = routeCoordinates
-        self.triggerCamera = true
+        self.markersSBE = markersSBE
     }
     
     var body: some View {
         ZStack {
             Map(position: $centerPosition) {
+                ForEach(markersSBE) { (marker: MarkerComment) in
+                    Marker(coordinate: marker.coordinate) {
+                        Label(marker.message, systemImage: "mappin")
+                    }
+                }
                 MapPolyline(coordinates: self.routeCoordinates).stroke(.red, lineWidth: 2)
                 ForEach(markerComments) { ( markerComment: MarkerComment ) in
                     Marker(coordinate: markerComment.coordinate) {
@@ -38,7 +47,6 @@ struct MapOfRoute: View {
                     }
                 }
             }
-            .ignoresSafeArea()
             .mapControls {
                 MapUserLocationButton()
             }
@@ -63,8 +71,13 @@ struct MapOfRoute: View {
                         .font(.title2)
                         .padding(EdgeInsets(top: 5, leading: 0, bottom: 0, trailing: 0))
                     Text("The marker will be placed at your current location")
-                        .font(.caption2)
+                        .font(.caption)
                         .padding()
+                    if messageFailedToSend {
+                        Text("Message failed to send. Try again.")
+                            .font(.caption2)
+                            .foregroundStyle(.red)
+                    }
                     TextField("Enter a message", text: $message)
                         .fixedSize()
                     HStack {
@@ -74,8 +87,14 @@ struct MapOfRoute: View {
                         }
                         Spacer().border(.gray, width: 0.5)
                         Button("Submit") {
+                            
                             postMarkerComment()
-                            toggleMarkerComment.toggle()
+                            if message == "" {
+                                toggleMarkerComment.toggle()
+                            }
+                            else {
+                                messageFailedToSend = true
+                            }
                         }
                         Spacer()
                     }
@@ -103,14 +122,21 @@ struct MapOfRoute: View {
         
     // This function can be removed if battery and data usage is heavily impacted
     func postMarkerComment() {
+        if message == "" {
+            messageFailedToSend = true
+            return
+        }
         let userCurrentCoordinate: NetworkCoordinate = userCoordinates.last!
         let newMarkerComment = MarkerComment(coordinate: CLLocationCoordinate2D(latitude: userCurrentCoordinate.latitude, longitude: userCurrentCoordinate.longitude), message: message)
         
         guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/CommentMarker") else { return }
+        guard let url = URL(string: "http://localhost:3000/api/ClubActivity/CommentMarker") else { return } // Change URL
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
+        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        request.setValue("bearer: \(ProcessInfo.processInfo.environment["LiveTrackerID"]!)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 60
         request.httpBody = try! JSONEncoder().encode(newMarkerComment)
         
         URLSession.shared.dataTask(with: request) { _, response, error in
@@ -124,13 +150,8 @@ struct MapOfRoute: View {
             if (200...299).contains(response.statusCode) {
                 markerComments.append(newMarkerComment)
                 message = ""
+                messageFailedToSend = false
             }
         }.resume()
-    }
-}
-
-extension Map {
-    func zoomLevel() {
-        
     }
 }

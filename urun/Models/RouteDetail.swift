@@ -10,22 +10,25 @@ struct RouteDetail {
     let latitude: Double        // The center latitude position of a route
     let longitude: Double       // The center longitude position of a route
     let zoom: Double            // Zoom distance from 0m - 1000000m
-    let elevation: Double       // Elevation
+    let elevationGain: Double       // Elevation gain
+    let elevationDecline: Double       // Elevation decline
     
     init() {
         self.totalDistance = Double.nan
         self.latitude = Double.nan
         self.longitude = Double.nan
         self.zoom = Double.nan
-        self.elevation = Double.nan
+        self.elevationGain = Double.nan
+        self.elevationDecline = Double.nan
     }
     
-    init(totalDistance: Double, latitude: Double, longitude: Double, zoom: Double, elevation: Double) {
+    init(totalDistance: Double, latitude: Double, longitude: Double, zoom: Double, elevationGain: Double, elevationDecline: Double) {
         self.totalDistance = totalDistance
         self.latitude = latitude
         self.longitude = longitude
         self.zoom = zoom
-        self.elevation = elevation
+        self.elevationGain = elevationGain
+        self.elevationDecline = elevationDecline
     }
     
     func isEmpty() -> Bool {

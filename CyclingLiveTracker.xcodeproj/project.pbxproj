@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		BE390FF22D66DCC400F310EE /* DeviceLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE390FF12D66DCC400F310EE /* DeviceLocationService.swift */; };
 		BE58BA732D82118900521B04 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA722D82118800521B04 /* NetworkMonitor.swift */; };
-		BE58BA752D82605C00521B04 /* MapOfRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA742D82605B00521B04 /* MapOfRoute.swift */; };
+		BE58BA752D82605C00521B04 /* MapOfRouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA742D82605B00521B04 /* MapOfRouteView.swift */; };
 		BE58BA772D8CE67400521B04 /* LiveTrackerLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA762D8CE67300521B04 /* LiveTrackerLocation.swift */; };
 		BE85C2EB2DB86D410007AB95 /* Coordinate+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE85C2E52DB86D410007AB95 /* Coordinate+CoreDataClass.swift */; };
 		BE85C2EC2DB86D410007AB95 /* Coordinate+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE85C2E62DB86D410007AB95 /* Coordinate+CoreDataProperties.swift */; };
@@ -19,7 +19,7 @@
 		BECF67E72DB9DCCE0096D0E5 /* RouteInfo+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BECF67E52DB9DCC60096D0E5 /* RouteInfo+CoreDataProperties.swift */; };
 		BED4840B2DBB40D400EBC128 /* MarkerCoordinate+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED484092DBB40D000EBC128 /* MarkerCoordinate+CoreDataClass.swift */; };
 		BED4840C2DBB40D400EBC128 /* MarkerCoordinate+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED4840A2DBB40D000EBC128 /* MarkerCoordinate+CoreDataProperties.swift */; };
-		BED4840E2DBB605200EBC128 /* DrawerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED4840D2DBB5FD500EBC128 /* DrawerMenu.swift */; };
+		BED4840E2DBB605200EBC128 /* DrawerMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED4840D2DBB5FD500EBC128 /* DrawerMenuView.swift */; };
 		BED484102DBB6CA100EBC128 /* ActivityTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED4840F2DBB6CA100EBC128 /* ActivityTracker.swift */; };
 		BEDA83C22D65B90C001C159A /* CyclingLiveTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEDA83C12D65B90C001C159A /* CyclingLiveTrackerApp.swift */; };
 		BEDA83C42D65B90C001C159A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEDA83C32D65B90C001C159A /* ContentView.swift */; };
@@ -27,7 +27,7 @@
 		BEDA83C92D65B90F001C159A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BEDA83C82D65B90F001C159A /* Preview Assets.xcassets */; };
 		BEF7E47B2D978AAE00A30A6A /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF7E47A2D978AAE00A30A6A /* DataController.swift */; };
 		BEF7E48F2D97D17500A30A6A /* MarkerComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF7E48E2D97D17500A30A6A /* MarkerComment.swift */; };
-		BEF7E4912D97D18F00A30A6A /* CoordinateEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF7E4902D97D18F00A30A6A /* CoordinateEncoder.swift */; };
+		BEF7E4912D97D18F00A30A6A /* RouteEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF7E4902D97D18F00A30A6A /* RouteEncoder.swift */; };
 		BEF7E4932D97D1FA00A30A6A /* RouteDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF7E4922D97D1FA00A30A6A /* RouteDetail.swift */; };
 		BEF7E49D2D9B506C00A30A6A /* NetworkCoordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF7E49C2D9B506C00A30A6A /* NetworkCoordinate.swift */; };
 		BEF7E49F2D9B50FC00A30A6A /* NetworkRouteInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF7E49E2D9B50FC00A30A6A /* NetworkRouteInfo.swift */; };
@@ -36,7 +36,7 @@
 /* Begin PBXFileReference section */
 		BE390FF12D66DCC400F310EE /* DeviceLocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceLocationService.swift; sourceTree = "<group>"; };
 		BE58BA722D82118800521B04 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
-		BE58BA742D82605B00521B04 /* MapOfRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapOfRoute.swift; sourceTree = "<group>"; };
+		BE58BA742D82605B00521B04 /* MapOfRouteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapOfRouteView.swift; sourceTree = "<group>"; };
 		BE58BA762D8CE67300521B04 /* LiveTrackerLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTrackerLocation.swift; sourceTree = "<group>"; };
 		BE85C2D62DB1D4B80007AB95 /* CyclingLiveTracker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "CyclingLiveTracker-Info.plist"; sourceTree = "<group>"; };
 		BE85C2E52DB86D410007AB95 /* Coordinate+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Coordinate+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -47,7 +47,7 @@
 		BECF67E52DB9DCC60096D0E5 /* RouteInfo+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RouteInfo+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		BED484092DBB40D000EBC128 /* MarkerCoordinate+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MarkerCoordinate+CoreDataClass.swift"; sourceTree = "<group>"; };
 		BED4840A2DBB40D000EBC128 /* MarkerCoordinate+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MarkerCoordinate+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		BED4840D2DBB5FD500EBC128 /* DrawerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerMenu.swift; sourceTree = "<group>"; };
+		BED4840D2DBB5FD500EBC128 /* DrawerMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerMenuView.swift; sourceTree = "<group>"; };
 		BED4840F2DBB6CA100EBC128 /* ActivityTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityTracker.swift; sourceTree = "<group>"; };
 		BEDA83BE2D65B90C001C159A /* CyclingLiveTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CyclingLiveTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEDA83C12D65B90C001C159A /* CyclingLiveTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclingLiveTrackerApp.swift; sourceTree = "<group>"; };
@@ -56,7 +56,7 @@
 		BEDA83C82D65B90F001C159A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		BEF7E47A2D978AAE00A30A6A /* DataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
 		BEF7E48E2D97D17500A30A6A /* MarkerComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerComment.swift; sourceTree = "<group>"; };
-		BEF7E4902D97D18F00A30A6A /* CoordinateEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateEncoder.swift; sourceTree = "<group>"; };
+		BEF7E4902D97D18F00A30A6A /* RouteEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteEncoder.swift; sourceTree = "<group>"; };
 		BEF7E4922D97D1FA00A30A6A /* RouteDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteDetail.swift; sourceTree = "<group>"; };
 		BEF7E49C2D9B506C00A30A6A /* NetworkCoordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkCoordinate.swift; sourceTree = "<group>"; };
 		BEF7E49E2D9B50FC00A30A6A /* NetworkRouteInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkRouteInfo.swift; sourceTree = "<group>"; };
@@ -94,7 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				BEF7E48B2D97D10D00A30A6A /* Models */,
-				BE58BA742D82605B00521B04 /* MapOfRoute.swift */,
+				BE58BA742D82605B00521B04 /* MapOfRouteView.swift */,
 				BE58BA722D82118800521B04 /* NetworkMonitor.swift */,
 				BECCC4F52D7E46BA0031FA81 /* Route.swift */,
 				BEDA83C12D65B90C001C159A /* CyclingLiveTrackerApp.swift */,
@@ -104,7 +104,7 @@
 				BE390FF12D66DCC400F310EE /* DeviceLocationService.swift */,
 				BE58BA762D8CE67300521B04 /* LiveTrackerLocation.swift */,
 				BEF7E47A2D978AAE00A30A6A /* DataController.swift */,
-				BED4840D2DBB5FD500EBC128 /* DrawerMenu.swift */,
+				BED4840D2DBB5FD500EBC128 /* DrawerMenuView.swift */,
 				BEA6D6062D9BAC72002CA93A /* RouteModel.xcdatamodeld */,
 			);
 			path = urun;
@@ -128,7 +128,7 @@
 				BE85C2E52DB86D410007AB95 /* Coordinate+CoreDataClass.swift */,
 				BE85C2E62DB86D410007AB95 /* Coordinate+CoreDataProperties.swift */,
 				BEF7E48E2D97D17500A30A6A /* MarkerComment.swift */,
-				BEF7E4902D97D18F00A30A6A /* CoordinateEncoder.swift */,
+				BEF7E4902D97D18F00A30A6A /* RouteEncoder.swift */,
 				BEF7E4922D97D1FA00A30A6A /* RouteDetail.swift */,
 				BEF7E49C2D9B506C00A30A6A /* NetworkCoordinate.swift */,
 				BEF7E49E2D9B50FC00A30A6A /* NetworkRouteInfo.swift */,
@@ -209,7 +209,7 @@
 			files = (
 				BEDA83C42D65B90C001C159A /* ContentView.swift in Sources */,
 				BEA6D6082D9BAC72002CA93A /* RouteModel.xcdatamodeld in Sources */,
-				BE58BA752D82605C00521B04 /* MapOfRoute.swift in Sources */,
+				BE58BA752D82605C00521B04 /* MapOfRouteView.swift in Sources */,
 				BEF7E49D2D9B506C00A30A6A /* NetworkCoordinate.swift in Sources */,
 				BECCC4F62D7E46BA0031FA81 /* Route.swift in Sources */,
 				BECF67E72DB9DCCE0096D0E5 /* RouteInfo+CoreDataProperties.swift in Sources */,
@@ -220,9 +220,9 @@
 				BE85C2EB2DB86D410007AB95 /* Coordinate+CoreDataClass.swift in Sources */,
 				BEF7E4932D97D1FA00A30A6A /* RouteDetail.swift in Sources */,
 				BE85C2EC2DB86D410007AB95 /* Coordinate+CoreDataProperties.swift in Sources */,
-				BEF7E4912D97D18F00A30A6A /* CoordinateEncoder.swift in Sources */,
+				BEF7E4912D97D18F00A30A6A /* RouteEncoder.swift in Sources */,
 				BEF7E48F2D97D17500A30A6A /* MarkerComment.swift in Sources */,
-				BED4840E2DBB605200EBC128 /* DrawerMenu.swift in Sources */,
+				BED4840E2DBB605200EBC128 /* DrawerMenuView.swift in Sources */,
 				BE58BA732D82118900521B04 /* NetworkMonitor.swift in Sources */,
 				BEDA83C22D65B90C001C159A /* CyclingLiveTrackerApp.swift in Sources */,
 				BED4840C2DBB40D400EBC128 /* MarkerCoordinate+CoreDataProperties.swift in Sources */,
