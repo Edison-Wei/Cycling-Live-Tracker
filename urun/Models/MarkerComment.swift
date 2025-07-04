@@ -41,7 +41,6 @@ struct MarkerComment: Identifiable, Encodable, Decodable {
         
         self.message = try container.decode(String.self, forKey: .message)
         let coordinateData = try container.decode([Double].self, forKey: .coordinate)
-        print("CoordinateData: \(coordinateData)")
         self.coordinate = CLLocationCoordinate2D(latitude: coordinateData[1], longitude: coordinateData[0])
     }
     

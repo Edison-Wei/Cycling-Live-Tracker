@@ -6,9 +6,9 @@
 //
 
 struct NetworkCoordinate: Codable {
-    let latitude: Double
-    let longitude: Double
-    let elevation: Double
+    var latitude: Double
+    var longitude: Double
+    var elevation: Double
     
     enum CodingKeys: String, CodingKey{
         case latitude
@@ -36,5 +36,11 @@ struct NetworkCoordinate: Codable {
         try container.encode(latitude, forKey: .latitude)
         try container.encode(longitude, forKey: .longitude)
         try container.encode(elevation, forKey: .elevation)
+    }
+    
+    public mutating func newCoordinate(_ latitude: Double, _ longitude: Double, _ elevation: Double) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.elevation = elevation
     }
 }

@@ -26,8 +26,7 @@ class LiveTrackerLocation {
             print("User Coordinate could not be received")
             return
         }
-//        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/LiveTrackerConnection") else { return } // Change URL
-        guard let url = URL(string: "http://localhost:3000/api/ClubActivity/LiveTrackerConnection") else { return } // Change URL
+        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/LiveTrackerConnection") else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"

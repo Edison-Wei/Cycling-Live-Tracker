@@ -9,18 +9,18 @@ import Combine
 import SwiftUI
 
 // TODO
-// 1. Figure out data being retrieved from sfucycling.ca
+// 1. (Done) Figure out data being retrieved from sfucycling.ca
 //      Most likely like:
 //                    let gpx: [Coordinates]
 //                    let distance: Double
 //                    let start_date: Date
 //                    let start_time: TimeInterval
 //                    let end_time: TimeInterval
-// 2. Create a parser for the geojson data or gpx im not 100% which (if needed)
-// 3. display data on the map and have a userCurrentPosition
-// 4. Figure out how to send the data to the server
-// 5. Have a cache system that stores the routeinfo to reduce calculation time and data usage
-// 6. Create a login screen (For the executives to use only)
+// 2. (Done) Create a parser for the geojson data or gpx im not 100% which (if needed)
+// 3. (Done) display data on the map and have a userCurrentPosition
+// 4. (Done) Find out how to send the data to the server
+// 5. (Done) Have a cache system that stores the routeinfo to reduce calculation time and data usage
+// 6. (X) Create a login screen (For the executives to use only)
 
 
 struct ContentView: View {
@@ -30,7 +30,7 @@ struct ContentView: View {
     private let dataController: DataController = DataController()
     let liveTrackerID = ProcessInfo.processInfo.environment["LiveTrackerID"] ?? ""
     
-    @State var routeDetails: Route = Route()
+    @State var routeDetail: Route = Route()
     @State var tokens: Set<AnyCancellable> = []
     @State var userCoordinates: [NetworkCoordinate] = []
     @State var markerComments: [MarkerComment] = []
@@ -40,8 +40,11 @@ struct ContentView: View {
     @State private var isTrackerOn: Bool = false
     @State private var isProcessing: Bool = false
     
-    @State var drawerOffset: CGFloat = 0
+    @State private var showRetryFetch: Bool = false
+    @State private var messageFromServer: String = ""
     
+    @State var drawerOffset: CGFloat = 0
+
     private func snapPosition(geometry: GeometryProxy, position: DrawerPosition) -> CGFloat {
         switch position {
         case .hidden:
@@ -58,23 +61,21 @@ struct ContentView: View {
         case quarter
         case full
     }
-    
+
     @State private var currentSnapPosition: DrawerPosition = .quarter
     
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .bottom) {
-                if routeDetails.isRouteReceived() {
+                if routeDetail.isRouteReceived() {
                     MapOfRouteView(
-                        routeCoordinates: routeDetails.getCLLocationCoordinates2D(),
-                        routeDetail: routeDetails.getRouteDetail(),
-                        markersSBE: routeDetails.getMarkerComments(),
+                        route: routeDetail,
                         userCoordinates: $userCoordinates,
                         markerComments: $markerComments)
                 }
                 
                 
-                DrawerMenuView(route: routeDetails, userCoordinate: $userCoordinates , markerComments: $markerComments)
+                DrawerMenuView(route: routeDetail, userCoordinate: $userCoordinates , markerComments: $markerComments)
                     .environmentObject(activityTracker)
                     .frame(height: geometry.size.height)
                     .offset(y: drawerOffset)
@@ -120,102 +121,40 @@ struct ContentView: View {
                         else {
                             if dataController.checkStoredRouteDate() {
                                 let routeInfo = dataController.fetchLocalRouteInfo()
-                                self.routeDetails = Route(routeInfo: routeInfo!)
+                                self.routeDetail = Route(routeInfo: routeInfo!)
                             }
                             else {
-                                while !networkMonitor.isConnected {
-                                    // send alert to connect
-                                }
-                                fetchRouteData()
+                                drawerOffset = snapPosition(geometry: geometry, position: .full)
+                                showRetryFetch = true
                             }
                         }
                         observeCoordinateUpdates()
                         observeLocationAccessDenied()
                     }
+                
+                if showRetryFetch {
+                    VStack(spacing: 10) {
+                        Text(messageFromServer)
+                            .font(.title)
+                            .padding(.bottom, 10)
+                        Button {
+                            fetchRouteData()
+                            showRetryFetch = false
+                        } label: {
+                            VStack(spacing: 5) {
+                                Image(systemName: "arrow.circlepath")
+                                Text("Try agian")
+                                    .font(.title2)
+                            }
+                        }
+                        .font(.title)
+                    }
+                    .frame(height: geometry.size.height)
+                    .offset(y: drawerOffset == geometry.size.height ? drawerOffset : drawerOffset * 0.5)
+                }
             }
         }
     }
-    
-    
-//    var body: some View {
-//        VStack {
-//            Text(routeDetails.getDate())
-//                .font(.largeTitle)
-//            Text(routeDetails.getTime())
-//            Text("Distance: \(routeDetails.getDistance()) Elev: \(routeDetails.getElevation())")
-//        }
-//        .onAppear {
-//            observeCoordinateUpdates()
-//            observeLocationAccessDenied()
-//        }
-//        
-//        VStack {
-//            if isProcessing {
-//                ZStack {
-//                    ProgressView()
-//                }
-//                .onAppear {
-//                    postUserRouteData()
-//                }.padding()
-//            }
-//            else {
-//                Button(trackerTitle) {
-//                    if isTrackerOn {
-//                        isTrackerOn = false
-//                        trackerTitle = "Start Tracking"
-//                        isProcessing = true
-//                        stopSendingLocationData()
-//                    }
-//                    else {
-//                        isTrackerOn = true
-//                        trackerTitle = "Finish Ride"
-//                        startSendingLocationData()
-//                    }
-//                    deviceLocationService.requestLocationServices(isTrackerOn)
-//                }
-//                .padding()
-//                .border(Color.cyan, width: 2)
-//                .cornerRadius(5.0)
-//            }
-//        }.onAppear {
-//            if networkMonitor.isConnected {
-//                fetchRouteData()
-//            }
-//            else {
-//                if dataController.checkStoredRouteDate() {
-//                    let routeInfo = dataController.fetchLocalRouteInfo()
-//                    self.routeDetails = Route(routeInfo: routeInfo!)
-//                }
-//                else {
-//                    while !networkMonitor.isConnected {
-//                        // send alert to connect then
-//                    }
-//                    fetchRouteData()
-//                }
-//            }
-//            
-////            if dataController.checkStoredRouteDate() {
-////                let routeInfo = dataController.fetchLocalRouteInfo()
-////                self.routeDetails = Route(routeInfo: routeInfo!)
-////            }
-////            else if networkMonitor.isConnected {
-////                fetchRouteData()
-////            }
-////            else {
-////                while !networkMonitor.isConnected {
-////                    
-////                }
-////            }
-//        }
-//        
-//        if routeDetails.isRouteReceived() {
-//            MapOfRoute(
-//                routeCoordinates: routeDetails.getCLLocationCoordinates2D(),
-//                routeDetail: routeDetails.getRouteDetail(),
-//                userCoordinates: $userCoordinates,
-//                markerComments: $markerComments)
-//        }
-//    }
     
     func observeCoordinateUpdates() {
         deviceLocationService.coordinatesPublisher
@@ -225,10 +164,8 @@ struct ContentView: View {
                     print(error)
                 }
             } receiveValue: { coordinates in
-                print("Current coordinate: \(coordinates)")
-                print("Coordinate count: \(userCoordinates.count)")
-                
                 self.userCoordinates.append(NetworkCoordinate(latitude: coordinates.coordinate.latitude, longitude: coordinates.coordinate.longitude, elevation: coordinates.altitude))
+                self.activityTracker.calculateDistance(NetworkCoordinate(latitude: coordinates.coordinate.latitude, longitude: coordinates.coordinate.longitude, elevation: coordinates.altitude))
             }
             .store(in: &tokens)
     }
@@ -244,14 +181,18 @@ struct ContentView: View {
     
     func fetchRouteData() {
         let routeDate = dataController.getRouteDate()
-        print(routeDate.ISO8601Format())
         
-//        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation?id=\(liveTrackerID)&route_date=\(routeDate.ISO8601Format())") else { return }
-        guard let url = URL(string: "http://localhost:3000/api/ClubActivity/RouteInformation?id=\(liveTrackerID)&route_date=\(routeDate.ISO8601Format())") else { return }
+        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation?id=\(liveTrackerID)&route_date=\(routeDate.ISO8601Format())") else { return }
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
                 print("Network Error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    messageFromServer = error.localizedDescription
+                    showRetryFetch = true
+                    drawerOffset = 0.0
+                }
+                return
             }
             guard let response = response as? HTTPURLResponse,
                   (200...299).contains(response.statusCode)
@@ -261,30 +202,57 @@ struct ContentView: View {
             }
             guard let data = data 
             else {
-                print("Data was not received")
+                messageFromServer = "Route could not be fetched"
+                showRetryFetch = true
+                drawerOffset = 0
                 return
             }
             
             if response.statusCode == 202 {
                 DispatchQueue.main.async {
                     let routeInfo = dataController.fetchLocalRouteInfo()
-                    self.routeDetails = Route(routeInfo: routeInfo!)
+                    self.routeDetail = Route(routeInfo: routeInfo!)
                 }
                 return
+            } else if response.statusCode == 203 {
+                do {
+                    let routeMessageObject = try JSONDecoder().decode(NetworkMessage.self, from: data)
+                    DispatchQueue.main.async {
+                        messageFromServer = routeMessageObject.message
+                        showRetryFetch = true
+                        drawerOffset = 0.0
+                    }
+                    return
+                } catch {
+                    print("routeMessage was not decoded properly")
+                    print(error.localizedDescription)
+                }
+            }
+            else if response.statusCode == 501 {
+                do {
+                    let routeMessageObject = try JSONDecoder().decode(NetworkMessage.self, from: data)
+                    DispatchQueue.main.async {
+                        messageFromServer = routeMessageObject.message
+                        showRetryFetch = true
+                        drawerOffset = 0.0
+                    }
+                    return
+                } catch {
+                    print("routeMessage was not decoded properly")
+                    print(error.localizedDescription)
+                }
             }
             
             do {
                 let routeInfoObject = try JSONDecoder().decode(NetworkRouteInfo.self, from: data)
-                print("From Fetch \(routeInfoObject)")
                 if routeInfoObject.isEmpty() {
                     return
                 }
                 DispatchQueue.main.async {
                     dataController.storeRouteInfo(routeInfo: routeInfoObject)
-                    self.routeDetails = Route(routeInfo: routeInfoObject)
+                    self.routeDetail = Route(routeInfo: routeInfoObject)
                 }
             } catch {
-                // Fix still
                 print("RouteInfo was not decoded properly")
                 print(error.localizedDescription)
             }

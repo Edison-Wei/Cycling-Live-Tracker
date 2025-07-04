@@ -1,2 +1,2 @@
 ## Live Tracker
-Built for the SFUCycling Club. This application tracks and stores 
+An IOS application built for the SFUCycling Club. This IOS app will display the upcoming scheduled route from the retrieved GPX/GEOJson and extract distance, elevation, duration, and date.

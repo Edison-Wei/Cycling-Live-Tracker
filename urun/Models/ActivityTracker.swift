@@ -16,17 +16,17 @@ class ActivityTracker: ObservableObject {
     @Published var endTime: Date?
     @Published var timeElapsed: TimeInterval = 0
     @Published var distanceTravelled: Double = 0.0
+    @Published var totalElevation: Double = 0.0
+    private var prevCoordinate: NetworkCoordinate? = nil
     
     private var timer: Timer?
     private var lastPauseTime: Date?
-    private var lastLocation : CLLocation?
     
     func startTracking() {
         isTrackerOn = true
         startTime = Date()
         endTime = nil
         lastPauseTime = nil
-        lastLocation = nil
         
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true ) { [weak self] _ in
             guard let self = self else { return }
@@ -70,6 +70,27 @@ class ActivityTracker: ObservableObject {
         lastPauseTime = Date.now
     }
     
+    func calculateDistance(_ newCoordinate: NetworkCoordinate) {
+        guard prevCoordinate != nil
+        else {
+            let lng = newCoordinate.longitude * (Double.pi / 180.0);
+            let lat = newCoordinate.latitude * (Double.pi / 180.0);
+            prevCoordinate = NetworkCoordinate(latitude: lat, longitude: lng, elevation: newCoordinate.elevation)
+            return }
+        // Calculate Elevation gain/loss point to point
+        totalElevation = totalElevation + (newCoordinate.elevation - prevCoordinate!.elevation);
+
+        // To calculate totalDistance from previous point to current point
+        let lng2 = newCoordinate.longitude * (Double.pi / 180.0);
+        let lat2 = newCoordinate.latitude * (Double.pi / 180.0);
+
+        let x = (lng2 - prevCoordinate!.longitude) * cos((prevCoordinate!.latitude + lat2) / 2);
+        let y = lat2 - prevCoordinate!.latitude;
+        distanceTravelled = distanceTravelled + sqrt(x * x + y * y) * 6371.0;
+        
+        prevCoordinate?.newCoordinate(lat2, lng2, newCoordinate.elevation)
+    }
+    
     
     func formatTimeInterval(_ interval: TimeInterval) -> String {
         let hours = Int(interval) / 3600
@@ -79,7 +100,8 @@ class ActivityTracker: ObservableObject {
     }
     
     func formatDistance(_ distance: Double) -> String {
-        let kilometers = distance / 1000.0
-        return String(format: "%.2f km", kilometers)
+//        let kilometers = distance / 1000.0
+        return String(format: "%.2f km", distance)
+        
     }
 }

@@ -48,51 +48,29 @@ struct NetworkRouteInfo: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // Decode and parse the date properly
+        // Decode and parse the date to correct format
         let dateString = try? container.decode(String.self, forKey: .start_date)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
         self.start_date = dateFormatter.date(from: dateString!)
         
-        // Decode distance, start_time, and end_time normally
+        // Decode distance, start_time, and end_time
         let stringDistance = try? container.decode(String.self, forKey: .distance)
         self.distance = Double(stringDistance!)
         self.start_time = try? container.decode(String.self, forKey: .start_time)
         self.end_time = try? container.decode(String.self, forKey: .end_time)
         
-        // Decode `gpx` as a string then parse it as a JSON array
-        //        if let gpxString = try? container.decode(String.self, forKey: .gpx),
-        //           let gpxData = gpxString.data(using: .utf8),
-        //           let pairs = try? JSONDecoder().decode([[Double]].self, from: gpxData) {
-        //
-        //            // Map to Coordinates struct with `elv` defaulting to 0.0
-        //            self.gpx = pairs.map { NetworkCoordinate(latitude: $0[1], longitude: $0[0], elevation: $0[2]) }
-        //        } else {
-        //            self.gpx = []
-        //        }
+        // Decode a 2xn array (double array) with double values of [lat,lng]
         if let coordinatePairs = try? container.decode([[Double]].self, forKey: .gpx) {
-            print("Printing coordinatePairs: \(coordinatePairs)")
-            // Map to Coordinates struct with `elv` defaulting to 0.0
             self.gpx = coordinatePairs.map { NetworkCoordinate(latitude: $0[1], longitude: $0[0], elevation: $0[2]) }
         } else {
             self.gpx = []
         }
         
-        // Decode 'markerCoodinates' as a string then parse it as JSON array
-        //        if let markerCommentString = try? container.decode(String.self, forKey: .markerCoordinates),
-        //           let markerCommentData = markerCommentString.data(using: .utf8),
-        //           let markers = try? JSONDecoder().decode([MarkerComment].self, from: markerCommentData) {
-        //            print("Printing markerComment: \(markers)")
-        //
-        //            // Map to Coordinates struct with `elv` defaulting to 0.0
-        //            self.markerCoordinates = markers.map { MarkerComment(id: $0.id, coordinate: $0.coordinate, comment: $0.comment)}
-        //        } else {
-        //            self.gpx = []
-        //        }
+        // Decode an array of Markers and there messages
         if let markers = try? container.decode([MarkerComment].self, forKey: .markerCoordinates) {
-            print("Printing markerComment: \(markers)")
             
-            // Map to Coordinates struct with `elv` defaulting to 0.0
+            // Map to MarkerComment
             self.markerCoordinates = markers.map { MarkerComment(coordinate: $0.coordinate, message: $0.message)}
         } else {
             self.markerCoordinates = []

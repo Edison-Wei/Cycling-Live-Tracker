@@ -4,6 +4,7 @@
 //
 //  Created by Edison Wei on 2025-03-21.
 //
+import CoreLocation
 
 struct RouteDetail {
     let totalDistance: Double   // Distance of route in km
@@ -34,4 +35,8 @@ struct RouteDetail {
     func isEmpty() -> Bool {
         return latitude == Double.nan && longitude == Double.nan
     }
+    
+    func getCenterCoordinates() -> CLLocationCoordinate2D {
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }    
 }

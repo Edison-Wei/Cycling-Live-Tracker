@@ -57,7 +57,6 @@ class DeviceLocationService: NSObject, CLLocationManagerDelegate, ObservableObje
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         coordinatesPublisher.send(SendableCoordinates(coordinate: location.coordinate, altitude: location.altitude))
-        // location has altitude but idk how to send
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -69,4 +68,14 @@ class DeviceLocationService: NSObject, CLLocationManagerDelegate, ObservableObje
 struct SendableCoordinates {
     let coordinate: CLLocationCoordinate2D
     let altitude: Double
+    
+    init(coordinate: CLLocationCoordinate2D, altitude: Double) {
+        self.coordinate = coordinate
+        self.altitude = altitude
+    }
+    
+    init() {
+        coordinate = CLLocationCoordinate2D()
+        altitude = 0.0
+    }
 }

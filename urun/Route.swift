@@ -6,6 +6,7 @@
 //
 
 import MapKit
+import SwiftUI
 
 class Route {
     private var routeInfo: NetworkRouteInfo = NetworkRouteInfo()
@@ -42,7 +43,6 @@ class Route {
             "top": GeoJSON[0].latitude,
             "bottom": GeoJSON[0].latitude
         ]
-        print("Points from GeoJSON: \(points)")
         let Radius: Double = 6371; // Radius of Earth in km
         let screenHeight = 2556.0
         let screenWidth = 1179.0
@@ -120,19 +120,6 @@ class Route {
         zoomDistance = ((40075017.0 * cos(latInRadians)) / (pow(2, z) * 256)) * 4000.0
         
         lat = lat - 0.0025
-        
-        
-        print("deltaLat: \(deltaLat)")
-        print("deltaLng: \(deltaLng)")
-        print("zoomWidth: \(zoomWidth)")
-        print("zoomHeight: \(zoomHeight)")
-        print("z: \(z)")
-        print("zoomDistance: \(zoomDistance)")
-        
-        print("Points from GeoJSON: \(points)")
-        print("Calc lat: \(lat)")
-        print("Calc lng: \(lng)")
-        print("Calc zoom: \(zoomDistance)")
 
         return RouteDetail(totalDistance: totalDistance,
                            latitude: lat,
@@ -162,6 +149,10 @@ class Route {
     func getElevationDecline() -> Double {
         return routeDetail.elevationDecline
     }
+    func getCameraCenterPosition() -> MapCamera  {
+        return MapCamera(centerCoordinate: routeDetail.getCenterCoordinates(), distance: routeDetail.zoom)
+    }
+    
     func getDate() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM dd, yyyy"

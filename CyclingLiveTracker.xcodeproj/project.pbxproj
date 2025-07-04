@@ -11,6 +11,7 @@
 		BE58BA732D82118900521B04 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA722D82118800521B04 /* NetworkMonitor.swift */; };
 		BE58BA752D82605C00521B04 /* MapOfRouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA742D82605B00521B04 /* MapOfRouteView.swift */; };
 		BE58BA772D8CE67400521B04 /* LiveTrackerLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE58BA762D8CE67300521B04 /* LiveTrackerLocation.swift */; };
+		BE7239052DD48C78002A1224 /* NetworkMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE7239042DD48C77002A1224 /* NetworkMessage.swift */; };
 		BE85C2EB2DB86D410007AB95 /* Coordinate+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE85C2E52DB86D410007AB95 /* Coordinate+CoreDataClass.swift */; };
 		BE85C2EC2DB86D410007AB95 /* Coordinate+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE85C2E62DB86D410007AB95 /* Coordinate+CoreDataProperties.swift */; };
 		BEA6D6082D9BAC72002CA93A /* RouteModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BEA6D6062D9BAC72002CA93A /* RouteModel.xcdatamodeld */; };
@@ -38,6 +39,7 @@
 		BE58BA722D82118800521B04 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		BE58BA742D82605B00521B04 /* MapOfRouteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapOfRouteView.swift; sourceTree = "<group>"; };
 		BE58BA762D8CE67300521B04 /* LiveTrackerLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTrackerLocation.swift; sourceTree = "<group>"; };
+		BE7239042DD48C77002A1224 /* NetworkMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMessage.swift; sourceTree = "<group>"; };
 		BE85C2D62DB1D4B80007AB95 /* CyclingLiveTracker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "CyclingLiveTracker-Info.plist"; sourceTree = "<group>"; };
 		BE85C2E52DB86D410007AB95 /* Coordinate+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Coordinate+CoreDataClass.swift"; sourceTree = "<group>"; };
 		BE85C2E62DB86D410007AB95 /* Coordinate+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Coordinate+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 				BEF7E49C2D9B506C00A30A6A /* NetworkCoordinate.swift */,
 				BEF7E49E2D9B50FC00A30A6A /* NetworkRouteInfo.swift */,
 				BED4840F2DBB6CA100EBC128 /* ActivityTracker.swift */,
+				BE7239042DD48C77002A1224 /* NetworkMessage.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -213,6 +216,7 @@
 				BEF7E49D2D9B506C00A30A6A /* NetworkCoordinate.swift in Sources */,
 				BECCC4F62D7E46BA0031FA81 /* Route.swift in Sources */,
 				BECF67E72DB9DCCE0096D0E5 /* RouteInfo+CoreDataProperties.swift in Sources */,
+				BE7239052DD48C78002A1224 /* NetworkMessage.swift in Sources */,
 				BECF67E62DB9DCCE0096D0E5 /* RouteInfo+CoreDataClass.swift in Sources */,
 				BEF7E47B2D978AAE00A30A6A /* DataController.swift in Sources */,
 				BED4840B2DBB40D400EBC128 /* MarkerCoordinate+CoreDataClass.swift in Sources */,
@@ -363,12 +367,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"urun/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = TGFKJ3BBG4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "CyclingLiveTracker-Info.plist";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location will be tracked in the background";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location required to for Live Tracker to work";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location required for the LiveTracker to work";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -397,12 +401,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"urun/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = TGFKJ3BBG4;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "CyclingLiveTracker-Info.plist";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Location will be tracked in the background";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location required to for Live Tracker to work";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location required for the LiveTracker to work";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

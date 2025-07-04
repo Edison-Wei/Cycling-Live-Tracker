@@ -19,8 +19,7 @@ struct DrawerMenuView: View {
     @State var finishedProcessing: Bool = false
     
     // Timer to Send Coordinates to the server
-//    private var timer = Timer.publish(every: 300.0, on: .main, in: .common).autoconnect()
-    private var timer = Timer.publish(every: 30.0, on: .main, in: .common).autoconnect()
+    private var timer = Timer.publish(every: 300.0, on: .main, in: .common).autoconnect()
     @State private var timerSubscription: Cancellable? = nil
     
     let route: Route
@@ -43,23 +42,29 @@ struct DrawerMenuView: View {
                 if activityTracker.isTrackerOn {
                     VStack(spacing: 10) {
                         HStack {
-                            VStack {
-                                Text("Time")
-                                    .font(.caption2)
+                            VStack(alignment: .leading) {
+                                Text("Time:")
+                                    .font(.subheadline)
                                 Text(activityTracker.formatTimeInterval(activityTracker.timeElapsed))
                                     .font(.title2)
-                                    .monospacedDigit() // Keep digits aligned as time changes
                             }
                             Spacer()
-                            VStack {
-                                Text("Distance")
-                                    .font(.caption2)
+                            VStack(alignment: .leading) {
+                                Text("Distance:")
+                                    .font(.subheadline)
                                 Text(activityTracker.formatDistance(activityTracker.distanceTravelled))
                                     .font(.title2)
-                                    .monospacedDigit() // Keep digits aligned
                             }
                         }
-                        .padding(.horizontal)
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Elevation:")
+                                    .font(.subheadline)
+                                Text(activityTracker.formatDistance(activityTracker.totalElevation))
+                                    .font(.title2)
+                            }
+                            Spacer()
+                        }
                         if finishedProcessing {
                             Text("Finished Procesing")
                                 .font(.title2)
@@ -76,25 +81,20 @@ struct DrawerMenuView: View {
                                         ProgressView()
                                     }
                                     .onAppear {
-                                        print("You in posted")
                                         postUserRouteData()
                                     }
                             }
                             else {
-                                HStack {
+                                HStack(spacing: 10) {
                                     Button {
                                         activityTracker.finishTracking()
                                         isProcessing = true
                                         stopSendingLocationData()
-                                        print("Finished route")
-                                        print("isProcessing: \(isProcessing)")
                                     } label: {
                                         Label("Finish", systemImage: "stop.circle")
                                     }
                                     .buttonStyle(.borderedProminent)
                                     .tint(.red)
-                                    
-        //                            Spacer()
                                     
                                     if activityTracker.isPaused {
                                         Button {
@@ -114,11 +114,10 @@ struct DrawerMenuView: View {
                                         .tint(.orange)
                                     }
                                 }
-                                .padding(.horizontal)
                             }
                         }
                     }
-                    .padding(.bottom, 50)
+                    .padding(EdgeInsets(top: 0, leading: 20, bottom: 50, trailing: 20))
                     Spacer()
                 }
                 
@@ -127,12 +126,14 @@ struct DrawerMenuView: View {
                         HStack {
                             VStack(alignment: .leading) {
                                 Text("Ride Date:")
+                                    .font(.subheadline)
                                 Text(route.getDate())
                                     .font(.title3)
                             }
                             Spacer()
                             VStack(alignment: .leading) {
                                 Text("Time:")
+                                    .font(.subheadline)
                                 Text(route.getTime())
                                     .font(.title3)
                             }
@@ -140,13 +141,15 @@ struct DrawerMenuView: View {
                         
                         HStack {
                             VStack(alignment: .leading) {
-                                Text("Total Distance:")
+                                Text("Distance:")
+                                    .font(.subheadline)
                                 Text(route.formatDistance())
                                     .font(.title3)
                             }
                             Spacer()
                             VStack(alignment: .leading) {
-                                Text("Total Elevation:")
+                                Text("Elevation:")
+                                    .font(.subheadline)
                                 HStack(spacing: 5) {
                                     (Text(String(format: "%.2f", route.getElevationGain()))
                                         .font(.title3)
@@ -179,18 +182,20 @@ struct DrawerMenuView: View {
                 
                 Spacer()
             }
-            .frame(maxWidth: .infinity, alignment: .center) // Center the content horizontally
-            .padding(.bottom, 50) // Add some bottom padding
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.bottom, 50)
         }
-        .background(.regularMaterial) // Add a translucent background
+        .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
         .ignoresSafeArea()
         
         if discardRoute {
             RoundedRectangle(cornerRadius: 5)
+                .background(.gray)
+                .shadow(radius: 2.0)
                 .padding(5)
                 .overlay {
-                    VStack {
+                    VStack(spacing: 10) {
                         Text("Discard Route?")
                             .font(.title2)
                         Button {
@@ -223,11 +228,8 @@ struct DrawerMenuView: View {
     }
     
     func postUserRouteData() {
-//        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation") else { return }
-        guard let url = URL(string: "http://localhost:3000/api/ClubActivity/RouteInformation") else { return }
-        print("In postUserRoute")
-        if userCoordinates.isEmpty || userCoordinates.count < 10 {
-            print("Not enough coordinates to save: \(userCoordinates.count)")
+        guard let url = URL(string: "https://www.sfucycling.ca/api/ClubActivity/RouteInformation") else { return }
+        if userCoordinates.isEmpty || userCoordinates.count < 300 {
             isProcessing = false
             discardRoute = true
             return
@@ -247,11 +249,6 @@ struct DrawerMenuView: View {
         request.setValue("bearer: \(ProcessInfo.processInfo.environment["LiveTrackerID"]!)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 60
         request.httpBody = try! JSONEncoder().encode(RouteEncoder(coordinates: sending, markerCoordinates: markerComments, elapsedTime: activityTracker.formatTimeInterval(activityTracker.timeElapsed)))
-        
-        let jsonEncoded = try! JSONEncoder().encode(RouteEncoder(coordinates: sending, markerCoordinates: markerComments, elapsedTime: activityTracker.formatTimeInterval(activityTracker.timeElapsed)))
-        
-        print(jsonEncoded)
-        print(String(data: jsonEncoded, encoding: .utf8)!)
 
         URLSession.shared.dataTask(with: request) { _, response, error in
             guard error == nil else { isProcessing = false; discardRoute = true; return}
