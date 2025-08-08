@@ -5,6 +5,11 @@ Once the tracker has been started, location data will be continuously collected 
 
 
 ## Demo / Screenshots
+<img width="400" height="821" alt="LiveTracker-homescreen" src="https://github.com/user-attachments/assets/fc484d28-8418-4863-9186-6fbc4cf1bb3b" />
+
+<img width="403" height="822" alt="LiveTracker2-fullscreen" src="https://github.com/user-attachments/assets/f73ba84f-0d0f-4ce1-8ed6-b2a9de964201" />
+
+<img width="397" height="807" alt="LiveTracker3-ongoingscreen" src="https://github.com/user-attachments/assets/e2d2a73a-bbba-4f20-bd6d-78c723bbab35" />
 
 
 
